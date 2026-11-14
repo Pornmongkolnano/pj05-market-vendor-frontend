@@ -1,6 +1,11 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { type SubmitEvent, useState } from "react";
+import {
+  type RegistrationValues,
+  validateRegistration,
+} from "@/lib/registration";
 
 const fields = [
   { name: "name", label: "ชื่อ", type: "text", autoComplete: "name" },
@@ -14,68 +19,94 @@ const fields = [
   },
 ] as const;
 
-type FieldName = (typeof fields)[number]["name"];
-type FormValues = Record<FieldName, string>;
-type FormErrors = Partial<Record<FieldName, string>>;
+type FieldName = keyof RegistrationValues;
 
-const initialValues: FormValues = {
+const initialValues: RegistrationValues = {
   name: "",
   email: "",
   tel: "",
   password: "",
 };
 
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const minimumPasswordLength = 6;
+const submitMessages = {
+  emailInUse: "อีเมลนี้ถูกใช้สมัครสมาชิกแล้ว",
+  invalid: "กรุณาตรวจสอบข้อมูลสมัครสมาชิกอีกครั้ง",
+  rateLimited: "มีคำขอสมัครสมาชิกมากเกินไป กรุณาลองใหม่ภายหลัง",
+  unavailable: "ระบบสมัครสมาชิกขัดข้อง กรุณาลองใหม่อีกครั้ง",
+};
 
-function validate(values: FormValues): FormErrors {
-  const errors: FormErrors = {};
-  const email = values.email.trim();
+type SubmitStatus = "submitting" | keyof typeof submitMessages | null;
 
-  if (!values.name.trim()) {
-    errors.name = "กรุณากรอกชื่อ";
+function focusField(form: HTMLFormElement, name: FieldName) {
+  const input = form.elements.namedItem(name);
+  if (input instanceof HTMLInputElement) {
+    input.focus();
   }
-
-  if (!email) {
-    errors.email = "กรุณากรอกอีเมล";
-  } else if (!emailPattern.test(email)) {
-    errors.email = "กรุณากรอกอีเมลให้ถูกต้อง";
-  }
-
-  if (!values.tel.trim()) {
-    errors.tel = "กรุณากรอกเบอร์โทรศัพท์";
-  }
-
-  if (!values.password.trim()) {
-    errors.password = "กรุณากรอกรหัสผ่าน";
-  } else if (values.password.length < minimumPasswordLength) {
-    errors.password = "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร";
-  }
-
-  return errors;
 }
 
 export default function RegisterForm() {
-  const [values, setValues] = useState<FormValues>(initialValues);
+  const router = useRouter();
+  const [values, setValues] = useState<RegistrationValues>(initialValues);
   const [hasChecked, setHasChecked] = useState(false);
-  const errors = validate(values);
+  const [submitStatus, setSubmitStatus] = useState<SubmitStatus>(null);
+  const errors = validateRegistration(values);
   const firstInvalidField = fields.find(({ name }) => errors[name]);
+  const isSubmitting = submitStatus === "submitting";
+  const duplicateEmail = submitStatus === "emailInUse";
+  const generalError =
+    submitStatus && !isSubmitting && !duplicateEmail
+      ? submitMessages[submitStatus]
+      : null;
 
   function updateField(name: FieldName, value: string) {
     setValues((previous) => ({ ...previous, [name]: value }));
+    if (name === "email" && duplicateEmail) {
+      setSubmitStatus(null);
+    }
   }
 
-  function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (isSubmitting) {
+      return;
+    }
+
     setHasChecked(true);
+    const form = event.currentTarget;
 
     if (firstInvalidField) {
-      const input = event.currentTarget.elements.namedItem(
-        firstInvalidField.name,
-      );
-      if (input instanceof HTMLInputElement) {
-        input.focus();
+      focusField(form, firstInvalidField.name);
+      return;
+    }
+
+    setSubmitStatus("submitting");
+
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+
+      switch (response.status) {
+        case 201:
+          router.replace("/login?registered=1");
+          break;
+        case 400:
+          setSubmitStatus("invalid");
+          break;
+        case 409:
+          setSubmitStatus("emailInUse");
+          focusField(form, "email");
+          break;
+        case 429:
+          setSubmitStatus("rateLimited");
+          break;
+        default:
+          setSubmitStatus("unavailable");
       }
+    } catch {
+      setSubmitStatus("unavailable");
     }
   }
 
@@ -83,7 +114,12 @@ export default function RegisterForm() {
     <form method="post" noValidate onSubmit={handleSubmit} className="mt-6">
       <div className="space-y-4">
         {fields.map(({ name, label, type, autoComplete }) => {
-          const error = hasChecked ? errors[name] : undefined;
+          const error =
+            name === "email" && duplicateEmail
+              ? submitMessages.emailInUse
+              : hasChecked
+                ? errors[name]
+                : undefined;
           const errorId = `${name}-error`;
 
           return (
@@ -97,6 +133,7 @@ export default function RegisterForm() {
                 type={type}
                 autoComplete={autoComplete}
                 required
+                readOnly={isSubmitting}
                 value={values[name]}
                 onChange={(event) =>
                   updateField(name, event.currentTarget.value)
@@ -116,23 +153,23 @@ export default function RegisterForm() {
       </div>
       <button
         type="submit"
-        className="mt-6 min-h-11 w-full rounded-lg bg-slate-900 px-4 py-2.5 font-medium text-white hover:bg-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+        disabled={isSubmitting}
+        className="mt-6 min-h-11 w-full rounded-lg bg-slate-900 px-4 py-2.5 font-medium text-white enabled:hover:bg-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-wait disabled:opacity-70"
       >
-        ตรวจสอบข้อมูล
+        {isSubmitting ? "กำลังสมัครสมาชิก…" : "สมัครสมาชิก"}
       </button>
       <div role="status">
-        {hasChecked ? (
-          <p
-            className={
-              firstInvalidField
-                ? "sr-only"
-                : "mt-4 rounded-lg bg-emerald-50 px-3 py-2.5 text-sm text-emerald-900"
-            }
-          >
-            {firstInvalidField
-              ? "กรุณาแก้ไขช่องที่มีข้อผิดพลาด"
-              : "ข้อมูลผ่านการตรวจสอบแล้ว"}
+        {generalError ? (
+          <p className="mt-4 rounded-lg bg-red-50 px-3 py-2.5 text-sm text-red-900">
+            {generalError}
           </p>
+        ) : null}
+        {duplicateEmail ? (
+          <p className="sr-only">{submitMessages.emailInUse}</p>
+        ) : null}
+        {isSubmitting ? <p className="sr-only">กำลังสมัครสมาชิก…</p> : null}
+        {hasChecked && firstInvalidField ? (
+          <p className="sr-only">กรุณาแก้ไขช่องที่มีข้อผิดพลาด</p>
         ) : null}
       </div>
     </form>

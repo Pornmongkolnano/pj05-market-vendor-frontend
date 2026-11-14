@@ -25,3 +25,5 @@ npm run build
 ## Backend อ้างอิง
 
 PJ05 ใช้ Express API ที่มากับโจทย์ รอบทบทวน Auth เปิด Swagger ในเครื่องที่พอร์ต `5050` [API ของ PJ05](https://github.com/SWDevPrac2-69-1/PJ05-MarketVendorBook) · [Swagger ในเครื่อง](http://localhost:5050/api-docs/)
+
+ฟอร์ม `/register` ส่งข้อมูลผ่าน Next.js ไปยัง `POST /api/v1/auth/register` โหมด `npm run dev` ใช้ `http://127.0.0.1:5050` เป็นค่าเริ่มต้น ถ้าใช้พอร์ตอื่นหรือรันแบบ production ให้กำหนด `BACKEND_URL` เป็น origin ของ PJ05 เช่น `http://127.0.0.1:5050` ใน `.env.local` หรือใน environment ของ server
