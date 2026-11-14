@@ -43,11 +43,12 @@ export async function POST(request: Request) {
       return Response.json({ success: true }, { status: 201 });
     }
 
-    // PJ05 returns a MongoDB duplicate email error with an HTTP 500 status.
+    // The course starter reports its duplicate email error as HTTP 500.
     if (
-      upstream.status === 500 &&
-      typeof result?.error === "string" &&
-      duplicateEmailPattern.test(result.error)
+      upstream.status === 409 ||
+      (upstream.status === 500 &&
+        typeof result?.error === "string" &&
+        duplicateEmailPattern.test(result.error))
     ) {
       return Response.json({ success: false }, { status: 409 });
     }
