@@ -17,7 +17,10 @@ export default async function LoginPage({
   }>;
 }) {
   const { registered, next, callbackUrl } = await searchParams;
-  const destination = loginDestination(next ?? callbackUrl) || "/account";
+  const destination = loginDestination(next ?? callbackUrl);
+  const registerUrl = destination
+    ? `/register?${new URLSearchParams({ next: destination })}`
+    : "/register";
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-950 sm:px-6 sm:py-12">
@@ -28,10 +31,10 @@ export default async function LoginPage({
             สมัครสมาชิกสำเร็จ เข้าสู่ระบบได้เลย
           </p>
         ) : null}
-        <LoginForm destination={destination} />
+        <LoginForm destination={destination ?? "/account"} />
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm">
           <Link
-            href="/register"
+            href={registerUrl}
             className="font-medium underline underline-offset-4"
           >
             สมัครสมาชิก

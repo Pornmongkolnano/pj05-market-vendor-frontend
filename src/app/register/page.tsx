@@ -1,12 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { loginDestination } from "@/lib/auth-types";
 import RegisterForm from "./register-form";
 
 export const metadata: Metadata = {
   title: "สมัครสมาชิก | ระบบจองพื้นที่ตลาดกลางคืน",
 };
 
-export default function RegisterPage() {
+export default async function RegisterPage({
+  searchParams,
+}: PageProps<"/register">) {
+  const destination = loginDestination((await searchParams).next);
+  const successParams = new URLSearchParams({ registered: "1" });
+  if (destination) successParams.set("next", destination);
+
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-950 sm:px-6 sm:py-12">
       <div className="mx-auto max-w-md">
@@ -26,7 +33,7 @@ export default function RegisterPage() {
           >
             สมัครสมาชิก
           </h1>
-          <RegisterForm />
+          <RegisterForm successUrl={`/login?${successParams}`} />
         </section>
       </div>
     </main>

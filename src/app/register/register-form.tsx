@@ -44,7 +44,7 @@ function focusField(form: HTMLFormElement, name: FieldName) {
   }
 }
 
-export default function RegisterForm() {
+export default function RegisterForm({ successUrl }: { successUrl: string }) {
   const router = useRouter();
   const [values, setValues] = useState<RegistrationValues>(initialValues);
   const [hasChecked, setHasChecked] = useState(false);
@@ -90,7 +90,7 @@ export default function RegisterForm() {
 
       switch (response.status) {
         case 201:
-          router.replace("/login?registered=1");
+          router.replace(successUrl);
           break;
         case 400:
           setSubmitStatus("invalid");

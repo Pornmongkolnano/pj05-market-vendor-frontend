@@ -56,6 +56,10 @@ export async function POST(request: Request) {
     if (upstream.status === 429) {
       return Response.json({ success: false }, { status: 429 });
     }
+
+    if (upstream.status === 503) {
+      return Response.json({ success: false }, { status: 503 });
+    }
   } catch {
     return Response.json({ success: false }, { status: 503 });
   }

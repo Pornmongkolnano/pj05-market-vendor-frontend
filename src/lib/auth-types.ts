@@ -19,8 +19,7 @@ export function loginDestination(value: string | string[] | undefined) {
   if (
     !url ||
     url.origin !== origin ||
-    url.pathname.startsWith("//") ||
-    /^\/(?:login|api)(?:\/|$)/i.test(url.pathname)
+    /^\/(?:\/|(?:login|register|api)(?:\/|$))/i.test(url.pathname)
   ) {
     return undefined;
   }
