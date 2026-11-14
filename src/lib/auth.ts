@@ -100,21 +100,12 @@ const readSessionToken = cache(async () => {
 });
 
 export async function getSessionViewer(): Promise<Viewer | null> {
-  const token = await readSessionToken();
-  if (
-    !token?.sub ||
-    typeof token.email !== "string" ||
-    typeof token.name !== "string" ||
-    !isRole(token.role)
-  ) {
-    return null;
+  try {
+    return (await getViewer())?.viewer ?? null;
+  } catch (error) {
+    if (error instanceof Pj05Error) return null;
+    throw error;
   }
-  return {
-    id: token.sub,
-    email: token.email,
-    name: token.name,
-    role: token.role,
-  };
 }
 
 export const getViewer = cache(async () => {
