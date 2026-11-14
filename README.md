@@ -24,10 +24,20 @@ npm run lint
 npm run build
 ```
 
-## Backend อ้างอิง
+## ต่อกับ API ของ PJ05
 
-PJ05 ใช้ Express API ที่มากับโจทย์ รอบทบทวน Auth เปิด Swagger ในเครื่องที่พอร์ต `5050` [API ของ PJ05](https://github.com/SWDevPrac2-69-1/PJ05-MarketVendorBook) · [Swagger ในเครื่อง](http://localhost:5050/api-docs/)
+รัน Express และ MongoDB ตาม README ของ backend ตั้ง `PORT=5050` สำหรับใช้งานในเครื่อง หรือตั้ง `BACKEND_URL` เป็น origin ของ Express ที่กำลังใช้งานโดยเว้นส่วน `/api/v1` ไว้ [API รุ่นเดโมและวิธีสร้างแอดมิน](https://github.com/Pornmongkolnano/pj05-market-vendor-api/tree/deploy/pj05-demo) · [API ตั้งต้นจากรายวิชา](https://github.com/SWDevPrac2-69-1/PJ05-MarketVendorBook) · [Swagger ในเครื่อง](http://localhost:5050/api-docs/)
 
-ฟอร์ม `/register` ส่งข้อมูลผ่าน Next.js ไปยัง `POST /api/v1/auth/register` โหมด `npm run dev` ใช้ `http://127.0.0.1:5050` เป็นค่าเริ่มต้น ถ้าใช้พอร์ตอื่นหรือรันแบบ production ให้กำหนด `BACKEND_URL` เป็น origin ของ PJ05 เช่น `http://127.0.0.1:5050` ใน `.env.local` หรือใน environment ของ server
+ฟอร์ม `/register` ส่งข้อมูลผ่าน Next.js ไปยัง `POST /api/v1/auth/register` โหมด `npm run dev` ใช้ `http://127.0.0.1:5050` เป็นค่าเริ่มต้น ส่วน production อ่าน `BACKEND_URL` จาก environment ของเซิร์ฟเวอร์
 
 NextAuth Credentials ใช้ `POST /api/v1/auth/login` ตรวจรหัสผ่านและใช้ Bearer token อ่านบัญชีจาก `GET /api/v1/auth/me` ก่อนอนุญาตให้เข้าหน้าส่วนตัวและหน้าแอดมิน การออกจากระบบล้าง session cookie ของ NextAuth
+
+## เส้นทางเดโม
+
+| ผู้ใช้ | เส้นทาง |
+| --- | --- |
+| ทุกคน | `/spots` ดูรายการและรายละเอียดพื้นที่ขาย |
+| สมาชิก | `/bookings` ดู แก้ และลบรายการของตนเอง เริ่มจองจากหน้ารายละเอียดแผง |
+| แอดมิน | `/admin` เข้าหน้าจัดการแผง จัดการการจองทั้งหมด และเปิดแดชบอร์ดแยกตามวันที่และโซน |
+
+ก่อนซ้อม สร้างแผงตัวอย่างด้วยบัญชีแอดมินแล้วจองหนึ่งแผงด้วยบัญชีสมาชิกอีกบัญชี จะได้มีข้อมูลให้แอดมินแก้และลบในช่วงของตัวเอง
