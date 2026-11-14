@@ -1,3 +1,4 @@
+import { fetchPj05 } from "@/lib/pj05";
 import { validateRegistration } from "@/lib/registration";
 
 const duplicateEmailPattern =
@@ -29,20 +30,10 @@ export async function POST(request: Request) {
     return Response.json({ success: false }, { status: 400 });
   }
 
-  const backendUrl =
-    process.env.BACKEND_URL ||
-    (process.env.NODE_ENV === "development" ? "http://127.0.0.1:5050" : "");
-  if (!backendUrl) {
-    return Response.json({ success: false }, { status: 503 });
-  }
-
   try {
-    const upstream = await fetch(new URL("/api/v1/auth/register", backendUrl), {
+    const upstream = await fetchPj05("auth/register", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...values, role: "member" }),
-      redirect: "error",
-      signal: AbortSignal.timeout(8_000),
+      body: { ...values, role: "member" },
     });
     const result: { success?: unknown; error?: unknown } | null = await upstream
       .json()
