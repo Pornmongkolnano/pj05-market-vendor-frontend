@@ -17,6 +17,9 @@ export default async function AdminPage() {
         <Link href="/admin/bookings" className="button-secondary">
           การจองทั้งหมด
         </Link>
+        <Link href="/admin/dashboard" className="button-secondary">
+          แดชบอร์ดตลาด
+        </Link>
       </div>
     </main>
   );
