@@ -7,10 +7,7 @@ export default async function AccountPage() {
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-16">
-      <Link href="/" className="text-sm underline underline-offset-4">
-        กลับหน้าแรก
-      </Link>
-      <h1 className="mt-4 text-3xl font-semibold">บัญชีของฉัน</h1>
+      <h1 className="text-3xl font-semibold">บัญชีของฉัน</h1>
       <p className="mt-3">{viewer.name}</p>
       <p className="mt-1 text-sm text-slate-700">
         {viewer.role === "admin" ? "ผู้ดูแลระบบ" : "สมาชิก"}
@@ -23,7 +20,11 @@ export default async function AccountPage() {
           >
             จัดการตลาด
           </Link>
-        ) : null}
+        ) : (
+          <Link href="/bookings" className="button-primary">
+            การจองของฉัน
+          </Link>
+        )}
         <LogoutButton />
       </div>
     </main>
