@@ -14,6 +14,7 @@ export type Booking = {
   user: { _id: string; name: string; email: string } | null;
   bookingDate: string;
   productType: string;
+  createdAt?: string;
 };
 
 const feeFormat = new Intl.NumberFormat("th-TH", {

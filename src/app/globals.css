@@ -15,6 +15,11 @@
 	--color-sand: #efddc7; /* nav text */
 	--color-taupe: #806d5e; /* muted text, borders */
 	--color-line: #e5d8c7; /* dividers */
+	--color-paper: #fffdfa; /* card background */
+	--color-linen: #f3e9d6; /* info banner */
+	--color-parchment: #fbf4e7; /* card footer strip */
+	--color-tan: #d5bea4; /* muted text on dark backgrounds */
+	--color-blush: #e5c8b5; /* muted text on dark wine */
 
 	--font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
 	--font-display: var(--font-cormorant), ui-serif, Georgia, serif;
