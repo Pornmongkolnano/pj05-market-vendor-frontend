@@ -3,7 +3,19 @@
 import { signOut } from "next-auth/react";
 import { useState } from "react";
 
-export default function LogoutButton() {
+const defaultLabels = {
+  idle: "ออกจากระบบ",
+  busy: "กำลังออกจากระบบ…",
+  failed: "ออกจากระบบไม่ได้ กรุณาลองใหม่อีกครั้ง",
+};
+
+export default function LogoutButton({
+  className = "min-h-11 rounded-lg border border-slate-400 bg-white px-4 font-medium hover:bg-slate-100 disabled:opacity-70",
+  labels = defaultLabels,
+}: {
+  className?: string;
+  labels?: typeof defaultLabels;
+}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [failed, setFailed] = useState(false);
 
@@ -34,13 +46,13 @@ export default function LogoutButton() {
         type="button"
         onClick={logout}
         disabled={isSubmitting}
-        className="min-h-11 rounded-lg border border-slate-400 bg-white px-4 font-medium hover:bg-slate-100 disabled:opacity-70"
+        className={className}
       >
-        {isSubmitting ? "กำลังออกจากระบบ…" : "ออกจากระบบ"}
+        {isSubmitting ? labels.busy : labels.idle}
       </button>
       {failed ? (
         <p role="alert" className="mt-2 text-sm text-red-800">
-          ออกจากระบบไม่ได้ กรุณาลองใหม่อีกครั้ง
+          {labels.failed}
         </p>
       ) : null}
     </div>

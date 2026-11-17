@@ -3,17 +3,37 @@
 import { useRouter } from "next/navigation";
 import { type SubmitEvent, useState } from "react";
 import {
+  minimumPasswordLength,
   type RegistrationValues,
   validateRegistration,
 } from "@/lib/registration";
 
 const fields = [
-  { name: "name", label: "ชื่อ", type: "text", autoComplete: "name" },
-  { name: "email", label: "อีเมล", type: "email", autoComplete: "email" },
-  { name: "tel", label: "เบอร์โทรศัพท์", type: "tel", autoComplete: "tel" },
+  {
+    name: "name",
+    label: "Full name",
+    placeholder: "Enter your name",
+    type: "text",
+    autoComplete: "name",
+  },
+  {
+    name: "email",
+    label: "Email address",
+    placeholder: "you@example.com",
+    type: "email",
+    autoComplete: "email",
+  },
+  {
+    name: "tel",
+    label: "Phone number",
+    placeholder: "Enter your phone number",
+    type: "tel",
+    autoComplete: "tel",
+  },
   {
     name: "password",
-    label: "รหัสผ่าน",
+    label: "Password",
+    placeholder: "Create a password",
     type: "password",
     autoComplete: "new-password",
   },
@@ -29,10 +49,10 @@ const initialValues: RegistrationValues = {
 };
 
 const submitMessages = {
-  emailInUse: "อีเมลนี้ถูกใช้สมัครสมาชิกแล้ว",
-  invalid: "กรุณาตรวจสอบข้อมูลสมัครสมาชิกอีกครั้ง",
-  rateLimited: "มีคำขอสมัครสมาชิกมากเกินไป กรุณาลองใหม่ภายหลัง",
-  unavailable: "ระบบสมัครสมาชิกขัดข้อง กรุณาลองใหม่อีกครั้ง",
+  emailInUse: "This email address is already registered.",
+  invalid: "Check your registration details and try again.",
+  rateLimited: "Too many registration attempts. Please try again later.",
+  unavailable: "Registration is temporarily unavailable. Please try again.",
 };
 
 type SubmitStatus = "submitting" | keyof typeof submitMessages | null;
@@ -111,9 +131,14 @@ export default function RegisterForm({ successUrl }: { successUrl: string }) {
   }
 
   return (
-    <form method="post" noValidate onSubmit={handleSubmit} className="mt-6">
-      <div className="space-y-4">
-        {fields.map(({ name, label, type, autoComplete }) => {
+    <form
+      method="post"
+      noValidate
+      onSubmit={handleSubmit}
+      className="market-auth-form"
+    >
+      <div className="market-fields">
+        {fields.map(({ name, label, placeholder, type, autoComplete }) => {
           const error =
             name === "email" && duplicateEmail
               ? submitMessages.emailInUse
@@ -121,17 +146,17 @@ export default function RegisterForm({ successUrl }: { successUrl: string }) {
                 ? errors[name]
                 : undefined;
           const errorId = `${name}-error`;
+          const hintId = name === "password" ? "password-hint" : undefined;
 
           return (
-            <div key={name}>
-              <label htmlFor={name} className="block text-sm font-medium">
-                {label}
-              </label>
+            <div key={name} className="market-field">
+              <label htmlFor={name}>{label}</label>
               <input
                 id={name}
                 name={name}
                 type={type}
                 autoComplete={autoComplete}
+                placeholder={placeholder}
                 required
                 readOnly={isSubmitting}
                 value={values[name]}
@@ -139,11 +164,16 @@ export default function RegisterForm({ successUrl }: { successUrl: string }) {
                   updateField(name, event.currentTarget.value)
                 }
                 aria-invalid={Boolean(error)}
-                aria-describedby={error ? errorId : undefined}
-                className="mt-1.5 block min-h-11 w-full rounded-lg border border-slate-500 bg-white px-3 py-2 text-base focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 aria-invalid:border-red-700"
+                aria-describedby={error ? errorId : hintId}
+                className="market-control"
               />
+              {hintId ? (
+                <p id={hintId} className="market-hint">
+                  At least {minimumPasswordLength} characters.
+                </p>
+              ) : null}
               {error ? (
-                <p id={errorId} className="mt-1.5 text-sm text-red-700">
+                <p id={errorId} className="market-field-error">
                   {error}
                 </p>
               ) : null}
@@ -154,22 +184,20 @@ export default function RegisterForm({ successUrl }: { successUrl: string }) {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="mt-6 min-h-11 w-full rounded-lg bg-slate-900 px-4 py-2.5 font-medium text-white enabled:hover:bg-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-wait disabled:opacity-70"
+        className="market-primary-action"
       >
-        {isSubmitting ? "กำลังสมัครสมาชิก…" : "สมัครสมาชิก"}
+        {isSubmitting ? "Registering…" : "Register"}
       </button>
       <div role="status">
         {generalError ? (
-          <p className="mt-4 rounded-lg bg-red-50 px-3 py-2.5 text-sm text-red-900">
-            {generalError}
-          </p>
+          <p className="market-error-notice">{generalError}</p>
         ) : null}
         {duplicateEmail ? (
           <p className="sr-only">{submitMessages.emailInUse}</p>
         ) : null}
-        {isSubmitting ? <p className="sr-only">กำลังสมัครสมาชิก…</p> : null}
+        {isSubmitting ? <p className="sr-only">Registering…</p> : null}
         {hasChecked && firstInvalidField ? (
-          <p className="sr-only">กรุณาแก้ไขช่องที่มีข้อผิดพลาด</p>
+          <p className="sr-only">Check the highlighted fields.</p>
         ) : null}
       </div>
     </form>

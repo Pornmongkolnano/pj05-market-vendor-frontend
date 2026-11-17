@@ -8,7 +8,7 @@ export type RegistrationValues = {
 type RegistrationErrors = Partial<Record<keyof RegistrationValues, string>>;
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const minimumPasswordLength = 6;
+export const minimumPasswordLength = 6;
 
 export function validateRegistration(
   values: RegistrationValues,
@@ -17,23 +17,23 @@ export function validateRegistration(
   const email = values.email.trim();
 
   if (!values.name.trim()) {
-    errors.name = "กรุณากรอกชื่อ";
+    errors.name = "Enter your name.";
   }
 
   if (!email) {
-    errors.email = "กรุณากรอกอีเมล";
+    errors.email = "Enter your email address.";
   } else if (!emailPattern.test(email)) {
-    errors.email = "กรุณากรอกอีเมลให้ถูกต้อง";
+    errors.email = "Enter a valid email address.";
   }
 
   if (!values.tel.trim()) {
-    errors.tel = "กรุณากรอกเบอร์โทรศัพท์";
+    errors.tel = "Enter your phone number.";
   }
 
   if (!values.password.trim()) {
-    errors.password = "กรุณากรอกรหัสผ่าน";
+    errors.password = "Enter a password.";
   } else if (values.password.length < minimumPasswordLength) {
-    errors.password = "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร";
+    errors.password = `Use at least ${minimumPasswordLength} characters.`;
   }
 
   return errors;

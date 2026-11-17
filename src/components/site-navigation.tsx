@@ -5,7 +5,10 @@ export default async function SiteNavigation() {
   const viewer = await getSessionViewer();
 
   return (
-    <header className="border-b border-slate-200 bg-white">
+    <header
+      data-default-navigation=""
+      className="border-b border-slate-200 bg-white"
+    >
       <nav
         aria-label="เมนูหลัก"
         className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-5 gap-y-1 px-4 py-2 sm:px-6"
