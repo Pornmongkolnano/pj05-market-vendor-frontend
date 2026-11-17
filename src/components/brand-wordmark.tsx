@@ -8,9 +8,9 @@ export default function BrandWordmark({
 }) {
 	return (
 		<Link
-			href="/"
+			href="/spots"
 			className="inline-flex items-center gap-3 whitespace-nowrap"
-			aria-label="ScubiduPapa Night Market home"
+			aria-label="ScubiduPapa Night Market: explore spots"
 		>
 			<span
 				className={`font-display text-[28px] leading-[1.08] font-bold italic sm:text-[34px] ${
