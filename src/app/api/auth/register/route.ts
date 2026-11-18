@@ -58,8 +58,7 @@ export async function POST(request: Request) {
       token = account.backendToken;
     }
 
-    const path = role === "admin" ? "auth/register/admin" : "auth/register";
-    const upstream = await fetchPj05(path, {
+    const upstream = await fetchPj05("auth/register", {
       method: "POST",
       token,
       body: values,
