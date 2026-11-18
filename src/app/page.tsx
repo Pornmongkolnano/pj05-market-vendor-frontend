@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
+import { getSessionViewer } from "@/lib/auth";
 
-// home page: "/" sends visitors straight to Explore spots.
-export default function Home() {
+export default async function Home() {
+	const viewer = await getSessionViewer();
+	if (viewer?.role === "admin") redirect("/admin/dashboard");
+	if (viewer?.role === "member") redirect("/bookings");
 	redirect("/spots");
 }

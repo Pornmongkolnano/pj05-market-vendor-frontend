@@ -5,21 +5,24 @@ import { useActionState, useState } from "react";
 import type { Spot } from "@/lib/market";
 import type { FormMutation } from "./action-state";
 import DeleteSpotDialog from "./delete-spot-dialog";
-import { ArrowLeftIcon, LockIcon } from "./icons";
+import { LockIcon } from "./icons";
 import SpotCard from "./spot-card";
 
 // size pattern formatter: "width × length" in metres
-const sizePattern = /^\s*(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)/i;
+const sizePattern =
+  /^\s*(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)\s*(?:m|ม\.?)?\s*$/i;
+const minDimension = 0.1;
+const validDimension = (value: string) =>
+  Number.isFinite(Number(value)) && Number(value) >= minDimension;
 
 function splitSize(spotSize: string) {
   const match = spotSize.match(sizePattern);
-  return match
+  return match && validDimension(match[1]) && validDimension(match[2])
     ? { width: match[1], length: match[2] }
     : { width: "", length: "" };
 }
 
 const joinSize = (width: string, length: string) => `${width} × ${length} m`;
-const positive = (value: string) => value !== "" && Number(value) > 0;
 
 const inputBox =
   "flex items-center gap-2 rounded-[5px] border border-line bg-paper px-[13px] py-3 text-[13px] leading-[1.45] focus-within:border-dark-wine";
@@ -52,14 +55,22 @@ export default function SpotEditor({
     setValues((previous) => ({ ...previous, [field]: value }));
   }
 
+  const sizeChanged =
+    values.width !== initial.width || values.length !== initial.length;
+  const needsDimensions = !spot || sizeChanged;
+  const dimensionsComplete =
+    validDimension(values.width) && validDimension(values.length);
+  const updatedSize = dimensionsComplete
+    ? joinSize(values.width, values.length)
+    : "";
+  const previewSize = needsDimensions ? updatedSize : spot?.spotSize;
   const complete =
     values.spotNumber.trim() !== "" &&
     values.zone.trim() !== "" &&
     values.locationDescription.trim() !== "" &&
     values.rentalFee !== "" &&
     Number(values.rentalFee) >= 0 &&
-    positive(values.width) &&
-    positive(values.length);
+    (!needsDimensions || dimensionsComplete);
   const changed = (Object.keys(initial) as Field[]).some(
     (field) => values[field] !== initial[field],
   );
@@ -67,7 +78,7 @@ export default function SpotEditor({
   const canSubmit = complete && (spot ? changed : true) && !pending;
 
   const area =
-    positive(values.width) && positive(values.length)
+    dimensionsComplete
       ? `${Number((Number(values.width) * Number(values.length)).toFixed(2))} m²`
       : "–";
 
@@ -76,10 +87,7 @@ export default function SpotEditor({
     _id: spot?._id ?? "preview",
     spotNumber: values.spotNumber || "Spot number",
     zone: values.zone || "Zone",
-    spotSize:
-      positive(values.width) && positive(values.length)
-        ? joinSize(values.width, values.length)
-        : "Width × length",
+    spotSize: previewSize || "Width × length",
     locationDescription: values.locationDescription || "Location description",
     rentalFee: Number(values.rentalFee) || 0,
     isActive: true,
@@ -88,18 +96,9 @@ export default function SpotEditor({
   return (
     <main className="flex flex-col gap-7 px-4 pt-7 pb-9 sm:px-8 lg:px-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-[9px]">
-          <Link
-            href="/admin/spots"
-            className="flex w-fit items-center gap-[7px] text-xs leading-[1.45] text-taupe hover:text-dark-wine"
-          >
-            <ArrowLeftIcon />
-            All vendor spots
-          </Link>
-          <h1 className="font-display text-[42px] leading-[1.1] font-medium break-words">
-            {spot ? `Edit spot ${spot.spotNumber}` : "Add new spot"}
-          </h1>
-        </div>
+        <h1 className="font-display text-[42px] leading-[1.1] font-medium break-words">
+          {spot ? `Edit spot ${spot.spotNumber}` : "Add new spot"}
+        </h1>
 
         <div className="flex gap-2.5">
           <Link
@@ -136,11 +135,10 @@ export default function SpotEditor({
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,840px)_minmax(0,480px)]">
         <div className="flex flex-col gap-5">
           <form id="spot-form" action={submit} className="flex flex-col gap-5">
-            {/* The server action reads spotSize, so send width × length as one field */}
             <input
               type="hidden"
               name="spotSize"
-              value={joinSize(values.width, values.length)}
+              value={needsDimensions ? updatedSize : ""}
             />
 
             <section className="flex flex-col gap-5 rounded-[7px] border border-line bg-paper p-6">
@@ -209,7 +207,7 @@ export default function SpotEditor({
                 {(["width", "length"] as const).map((field) => (
                   <Field
                     key={field}
-                    label={field === "width" ? "Width *" : "Length *"}
+                    label={`${field === "width" ? "Width" : "Length"}${needsDimensions ? " *" : ""}`}
                     htmlFor={field}
                   >
                     <div className={inputBox}>
@@ -217,9 +215,9 @@ export default function SpotEditor({
                         id={field}
                         type="number"
                         inputMode="decimal"
-                        min={0.1}
+                        min={minDimension}
                         step="any"
-                        required
+                        required={needsDimensions}
                         value={values[field]}
                         onChange={(e) => update(field, e.target.value)}
                         placeholder="3"
@@ -238,10 +236,9 @@ export default function SpotEditor({
                 </div>
               </div>
 
-              {spot && !sizePattern.test(spot.spotSize) ? (
+              {spot && !initial.width ? (
                 <p className="text-[11px] leading-[1.45] text-dark-wine">
-                  The saved size “{spot.spotSize}” is not in “width × length”
-                  form. Enter the width and length again.
+                  Saved size: {spot.spotSize}. Enter both dimensions to replace it.
                 </p>
               ) : null}
               <p className="text-[11px] leading-[1.45] text-taupe">

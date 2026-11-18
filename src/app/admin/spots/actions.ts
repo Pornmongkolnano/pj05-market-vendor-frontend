@@ -50,7 +50,7 @@ export async function saveSpot(
   if (
     !spotNumber ||
     !zone ||
-    !spotSize ||
+    (id === null && !spotSize) ||
     !locationDescription ||
     !fee ||
     !Number.isFinite(rentalFee) ||
@@ -67,7 +67,13 @@ export async function saveSpot(
     await pj05Data(id ? `spots/${id}` : "spots", {
       method: id ? "PUT" : "POST",
       token: account.backendToken,
-      body: { spotNumber, zone, spotSize, locationDescription, rentalFee },
+      body: {
+        spotNumber,
+        zone,
+        ...(spotSize ? { spotSize } : {}),
+        locationDescription,
+        rentalFee,
+      },
     });
   } catch (error) {
     return failure(error, page);

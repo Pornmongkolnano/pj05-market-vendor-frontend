@@ -16,7 +16,7 @@ export default async function SpotCatalog({
 }: {
   sort: SortKey;
   page: number;
-  basePath?: string;
+  basePath?: "/spots" | "/admin/spots";
 }) {
   const [spots, viewer] = await Promise.all([listSpots(), getSessionViewer()]);
 
@@ -25,20 +25,20 @@ export default async function SpotCatalog({
   const current = Math.min(page, totalPages);
   const shown = sorted.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
 
-  // The action link depends on the viewer's role.
   function action(spot: Spot) {
-    if (viewer?.role === "admin") {
+    if (basePath === "/admin/spots") {
       return {
-        href: `/admin/spots/${spot._id}/edit`,
-        label: "Edit spot",
-        icon: "pencil" as const,
+        actionHref: `/admin/spots/${spot._id}/edit`,
+        actionLabel: "Edit spot",
+        actionIcon: "pencil" as const,
       };
     }
+    if (viewer?.role === "admin") return {};
+
     const booking = `/bookings/new?spot=${spot._id}`;
     return {
-      href: viewer ? booking : loginPath(booking),
-      label: "Book spot",
-      icon: "arrow" as const,
+      actionHref: viewer ? booking : loginPath(booking),
+      actionLabel: "Book spot",
     };
   }
 
@@ -53,19 +53,11 @@ export default async function SpotCatalog({
       ) : (
         // 1 column on phones, 2 on tablets, 3 on desktop
         <ul className="grid grid-cols-1 gap-x-11 gap-y-[18px] sm:grid-cols-2 lg:grid-cols-3">
-          {shown.map((spot) => {
-            const { href, label, icon } = action(spot);
-            return (
-              <li key={spot._id}>
-                <SpotCard
-                  spot={spot}
-                  actionHref={href}
-                  actionLabel={label}
-                  actionIcon={icon}
-                />
-              </li>
-            );
-          })}
+          {shown.map((spot) => (
+            <li key={spot._id}>
+              <SpotCard spot={spot} {...action(spot)} />
+            </li>
+          ))}
         </ul>
       )}
 

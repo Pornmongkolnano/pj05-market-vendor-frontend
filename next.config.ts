@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
         destination: "/admin/dashboard",
         permanent: false,
       },
+      {
+        source: "/account",
+        destination: "/",
+        permanent: false,
+      },
     ];
   },
   turbopack: {

@@ -97,14 +97,6 @@ export function CalendarIcon(props: IconProps) {
   );
 }
 
-export function ArrowLeftIcon(props: IconProps) {
-  return (
-    <Svg {...props}>
-      <path d="M19 12H5M11 6l-6 6 6 6" />
-    </Svg>
-  );
-}
-
 export function PencilIcon(props: IconProps) {
   return (
     <Svg {...props}>

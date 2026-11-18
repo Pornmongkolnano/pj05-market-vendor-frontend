@@ -18,23 +18,6 @@
   gap: 6px;
 }
 
-.market-dashboard-back-link {
-  width: fit-content;
-  color: var(--market-muted);
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
-}
-
-.market-dashboard-back-link span {
-  margin-inline-end: 4px;
-}
-
-.market-dashboard-back-link:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
 .market-dashboard-content h1,
 .market-dashboard-content h2 {
   font-family: var(--font-display);

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { ScubiduPapaLayout } from "@/components/scubidupapa";
 import { requireViewer } from "@/lib/auth";
 import { listBookings, listSpots } from "@/lib/market-data";
@@ -68,9 +67,6 @@ export default async function DashboardPage({
     <ScubiduPapaLayout>
       <main className="market-dashboard-content">
         <div className="market-dashboard-heading">
-          <Link href="/account" className="market-dashboard-back-link">
-            <span aria-hidden="true">‹</span> My account
-          </Link>
           <h1>Market dashboard</h1>
           {params.account === "created" ? (
             <p role="status" className="market-success-notice">

@@ -1,10 +1,19 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { useLogout } from "./logout-button";
+import { useLogout } from "./use-logout";
 
-// drops down a "log out" button.
-export default function AccountMenu({ name }: { name: string }) {
+const menuItem =
+	"flex min-h-10 items-center rounded px-3 py-2 text-left whitespace-nowrap hover:bg-camel";
+
+export default function AccountMenu({
+	name,
+	admin,
+}: {
+	name: string;
+	admin: boolean;
+}) {
 	const [open, setOpen] = useState(false);
 	const menuRef = useRef<HTMLDivElement>(null);
 	const { logout, isSubmitting, failed } = useLogout();
@@ -32,7 +41,6 @@ export default function AccountMenu({ name }: { name: string }) {
 				type="button"
 				onClick={() => setOpen((value) => !value)}
 				aria-expanded={open}
-				aria-haspopup="true"
 				className="flex max-w-full cursor-pointer items-center gap-2.5 text-sm leading-[1.45] font-medium text-sand hover:text-light-apricot"
 			>
 				<span className="min-w-0 truncate">Hello, {name}</span>
@@ -55,14 +63,23 @@ export default function AccountMenu({ name }: { name: string }) {
 			</button>
 
 			{open ? (
-				<div className="absolute top-full right-0 z-40 mt-2 flex flex-col items-end gap-1">
+				<div className="absolute top-full right-0 z-40 mt-2 grid min-w-32 gap-1 rounded-md border border-taupe bg-soft-fawn p-1 text-sm text-coffee-bean shadow-md">
+					{admin ? (
+						<Link
+							href="/register"
+							className={menuItem}
+							onClick={() => setOpen(false)}
+						>
+							Create account
+						</Link>
+					) : null}
 					<button
 						type="button"
 						onClick={logout}
 						disabled={isSubmitting}
-						className="h-[31px] w-[95px] rounded-[5px] border border-taupe bg-soft-fawn text-sm text-coffee-bean hover:bg-camel disabled:cursor-wait disabled:opacity-70 cursor-pointer"
+						className={`${menuItem} cursor-pointer disabled:cursor-wait disabled:opacity-70`}
 					>
-						{isSubmitting ? "logging out…" : "log out"}
+						{isSubmitting ? "Logging out…" : "Log out"}
 					</button>
 					{failed ? (
 						<p

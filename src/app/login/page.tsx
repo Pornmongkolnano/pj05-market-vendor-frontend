@@ -32,7 +32,7 @@ export default async function LoginPage({
           : undefined
       }
     >
-      <LoginForm destination={destination ?? "/account?from=login"} />
+      <LoginForm destination={destination ?? "/"} />
     </ScubiduPapaAuthPage>
   );
 }

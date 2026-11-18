@@ -18,7 +18,8 @@ const adminLinks: NavItem[] = [
 // Guests and members see the same links ("My bookings" sends guests to log in first).
 export default async function SiteNavigation() {
 	const viewer = await getSessionViewer();
-	const links = viewer?.role === "admin" ? adminLinks : memberLinks;
+	const admin = viewer?.role === "admin";
+	const links = admin ? adminLinks : memberLinks;
 
 	return (
 		<header className="sticky top-0 z-30 bg-dark-coffee">
@@ -27,7 +28,7 @@ export default async function SiteNavigation() {
 				className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-4 gap-y-3 px-4 pt-[19px] pb-[22px] sm:px-8 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:px-10 xl:gap-x-6 xl:px-16"
 			>
 				<div className="justify-self-start">
-					<BrandWordmark tone="light" />
+					<BrandWordmark tone="light" admin={admin} />
 				</div>
 
 				<div className="col-span-2 row-start-2 min-w-0 justify-self-center lg:col-span-1 lg:row-start-auto">
@@ -36,7 +37,7 @@ export default async function SiteNavigation() {
 
 				<div className="min-w-0 max-w-full justify-self-end">
 					{viewer ? (
-						<AccountMenu name={viewer.name} />
+						<AccountMenu name={viewer.name} admin={admin} />
 					) : (
 						<GuestAuthLinks />
 					)}

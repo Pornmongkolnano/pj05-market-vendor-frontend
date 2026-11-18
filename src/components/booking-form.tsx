@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import {
-  type ReactNode,
   startTransition,
   type SubmitEvent,
   useActionState,
@@ -81,14 +80,12 @@ export default function BookingForm({
   initial,
   cancelPath,
   submitLabel,
-  children,
 }: {
   action: FormMutation;
   spots: Spot[];
   initial: BookingFormValues;
   cancelPath: string;
   submitLabel: string;
-  children?: ReactNode;
 }) {
   const [state, submit, pending] = useActionState(action, null);
   const [spotId, setSpotId] = useState(initial.spot);
@@ -188,10 +185,7 @@ export default function BookingForm({
 
   return (
     <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
-      <div className="min-w-0 space-y-4">
-        {form}
-        {children}
-      </div>
+      <div className="min-w-0">{form}</div>
       <SpotPreview spot={spots.find((spot) => spot._id === spotId)} />
     </div>
   );

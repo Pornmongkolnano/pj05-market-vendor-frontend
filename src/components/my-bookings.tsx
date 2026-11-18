@@ -4,7 +4,7 @@ import Link from "next/link";
 import { type Ref, useRef, useState } from "react";
 import { deleteBooking } from "@/app/bookings/actions";
 import type { Booking } from "@/lib/market";
-import DeleteConfirmation from "./delete-confirmation";
+import BookingCancelDialog from "./booking-cancel-dialog";
 import { CalendarIcon, PinIcon } from "./icons";
 
 // bookingDate is stored as UTC midnight, so read it in UTC to get the day the member picked.
@@ -296,8 +296,7 @@ function BookingDetails({
           </span>
         </div>
 
-        {/* Add Edit and Cancel buttons here */}
-        <div className="flex flex-wrap gap-auto justify-between">
+        <div className="flex flex-wrap justify-between gap-3">
           {canEdit && spot?.isActive ? (
             <Link
               href={`${list}/${booking._id}/edit`}
@@ -306,25 +305,13 @@ function BookingDetails({
               Edit booking
             </Link>
           ) : null}
-          {/* key resets the confirm step when another booking is selected */}
-          <DeleteConfirmation
+          <BookingCancelDialog
             key={booking._id}
-            label="Cancel booking"
-            prompt={
-              admin
-                ? "Cancel this member's booking? The spot will be released for other vendors."
-                : "Cancel this booking? The spot will be released for other vendors."
-            }
             action={deleteBooking.bind(null, booking._id, admin)}
+            bookingDate={booking.bookingDate}
+            spotNumber={spot?.spotNumber}
           />
         </div>
-
-        <p className="text-[11px] leading-[1.45] text-taupe">
-          Need a hand?
-          <span className="ml-1 font-medium underline cursor-pointer">
-            Contact market support
-          </span>
-        </p>
       </div>
     </aside>
   );

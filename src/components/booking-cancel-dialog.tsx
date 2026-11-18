@@ -8,7 +8,7 @@ const marketDate = new Intl.DateTimeFormat("en-GB", {
   timeZone: "UTC",
 });
 
-export default function AdminBookingDelete({
+export default function BookingCancelDialog({
   action,
   bookingDate,
   spotNumber,
@@ -30,7 +30,7 @@ export default function AdminBookingDelete({
         onClick={() => dialog.current?.showModal()}
         className="min-h-11 rounded-md border border-dark-wine px-4 py-2.5 text-sm font-semibold whitespace-nowrap text-dark-wine hover:bg-dark-wine hover:text-paper"
       >
-        Delete booking
+        Cancel booking
       </button>
       <dialog
         ref={dialog}
@@ -47,11 +47,11 @@ export default function AdminBookingDelete({
             id={titleId}
             className="font-display text-[36px] leading-tight font-medium"
           >
-            Delete this booking?
+            Cancel this booking?
           </h2>
           <p id={descriptionId} className="text-sm leading-relaxed text-taupe">
             {spotNumber ? `Spot ${spotNumber} · ${date}.` : `${date}.`} This
-            action cannot be undone.
+            will release the spot for that date and cannot be undone.
           </p>
           {state ? (
             <p
@@ -68,14 +68,14 @@ export default function AdminBookingDelete({
               onClick={() => dialog.current?.close()}
               className="min-h-11 rounded-md border border-line px-4 py-2.5 text-sm font-medium hover:bg-linen disabled:opacity-60"
             >
-              Cancel
+              Keep booking
             </button>
             <button
               type="submit"
               disabled={pending}
               className="min-h-11 rounded-md bg-dark-wine px-4 py-2.5 text-sm font-semibold text-paper hover:bg-coffee-bean disabled:opacity-60"
             >
-              {pending ? "Deleting…" : "Delete booking"}
+              {pending ? "Cancelling…" : "Cancel booking"}
             </button>
           </div>
         </form>

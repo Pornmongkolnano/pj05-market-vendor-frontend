@@ -20,11 +20,7 @@ export default async function NewBookingPage({
   const spots = await listSpots();
   const selectedSpot = spots.find((entry) => entry._id === selectedId);
   return (
-    <BookingPage
-      title="Book a spot"
-      backPath="/spots"
-      backLabel="Explore spots"
-    >
+    <BookingPage title="Book a spot">
       {spots.length ? (
         <BookingForm
           action={createBooking}

@@ -9,9 +9,9 @@ export default function SpotCard({
   actionIcon = "arrow",
 }: {
   spot: Spot;
-  // Leave out actionHref for a preview: the button is then drawn but not clickable.
+  // A label without a link draws the action in the vendor preview.
   actionHref?: string;
-  actionLabel: string;
+  actionLabel?: string;
   actionIcon?: "arrow" | "pencil";
 }) {
   const buttonClass =
@@ -50,7 +50,7 @@ export default function SpotCard({
             </span>
             <span className="text-[11px] text-taupe">/ night</span>
           </p>
-          {actionHref ? (
+          {actionHref && actionLabel ? (
             <Link
               href={actionHref}
               aria-label={`${actionLabel} ${spot.spotNumber}`}
@@ -59,12 +59,12 @@ export default function SpotCard({
               {actionLabel}
               {icon}
             </Link>
-          ) : (
+          ) : actionLabel ? (
             <span aria-hidden="true" className={buttonClass}>
               {actionLabel}
               {icon}
             </span>
-          )}
+          ) : null}
         </div>
       </div>
     </article>

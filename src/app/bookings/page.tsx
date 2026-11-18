@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import MyBookings from "@/components/my-bookings";
 import { requireViewer } from "@/lib/auth";
 import { listBookings } from "@/lib/market-data";
@@ -11,8 +12,8 @@ const notices: Record<string, string> = {
 export default async function BookingsPage({
   searchParams,
 }: PageProps<"/bookings">) {
-  // Members only: guests go to /login, admins to /forbidden
-  const { backendToken } = await requireViewer("/bookings", "member");
+  const { viewer, backendToken } = await requireViewer("/bookings");
+  if (viewer.role === "admin") redirect("/admin/bookings");
   const [bookings, { result }] = await Promise.all([
     listBookings(backendToken, "/bookings"),
     searchParams,
