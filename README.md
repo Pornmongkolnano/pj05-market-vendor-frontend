@@ -26,9 +26,9 @@ npm run build
 
 ## ต่อกับ API ของ PJ05
 
-รัน Express และ MongoDB ตาม README ของ backend ตั้ง `PORT=5050` สำหรับใช้งานในเครื่อง หรือตั้ง `BACKEND_URL` เป็น origin ของ Express ที่กำลังใช้งานโดยเว้นส่วน `/api/v1` ไว้ [API รุ่นเดโมและวิธีสร้างแอดมิน](https://github.com/Pornmongkolnano/pj05-market-vendor-api/tree/deploy/pj05-demo) · [API ตั้งต้นจากรายวิชา](https://github.com/SWDevPrac2-69-1/PJ05-MarketVendorBook) · [Swagger ในเครื่อง](http://localhost:5050/api-docs/)
+รัน Express และ MongoDB ตาม README ใน branch `main` ของ backend รุ่นเดโม ตั้ง `PORT=5050` สำหรับใช้งานในเครื่อง หรือตั้ง `BACKEND_URL` เป็น origin ของ Express ที่กำลังใช้งานโดยเว้นส่วน `/api/v1` ไว้ [API รุ่นเดโมและวิธีสร้างแอดมิน](https://github.com/Pornmongkolnano/pj05-market-vendor-api/tree/main) · [API ตั้งต้นจากรายวิชา](https://github.com/SWDevPrac2-69-1/PJ05-MarketVendorBook) · [Swagger ในเครื่อง](http://localhost:5050/api-docs/)
 
-ฟอร์ม `/register` ส่ง `name`, `email`, `tel`, `role` และ `password` ผ่าน Next.js บัญชี `member` ใช้ `POST /api/v1/auth/register` ส่วนแอดมินที่ล็อกอินแล้วเปิดเมนูสร้างบัญชีจาก `/admin` เพื่อสร้างบัญชี `admin` ผ่าน `POST /api/v1/auth/register/admin` โหมด `npm run dev` ใช้ `http://127.0.0.1:5050` เป็นค่าเริ่มต้น ส่วน production อ่าน `BACKEND_URL` จาก environment ของเซิร์ฟเวอร์
+ฟอร์ม `/register` ส่ง `name`, `email`, `tel`, `role` และ `password` ผ่าน Next.js ไปที่ `POST /api/v1/auth/register` ทั้งสองบทบาท แอดมินที่ล็อกอินแล้วเปิดเมนูสร้างบัญชีจาก `/admin` เพื่อเลือก `role: "admin"` และ Next.js แนบ Bearer token ให้ โหมด `npm run dev` ใช้ `http://127.0.0.1:5050` เป็นค่าเริ่มต้น ส่วน production อ่าน `BACKEND_URL` จาก environment ของเซิร์ฟเวอร์
 
 NextAuth Credentials ใช้ `POST /api/v1/auth/login` ตรวจรหัสผ่านและใช้ Bearer token อ่านบัญชีจาก `GET /api/v1/auth/me` ก่อนอนุญาตให้เข้าหน้าส่วนตัวและหน้าแอดมิน การออกจากระบบล้าง session cookie ของ NextAuth
 
