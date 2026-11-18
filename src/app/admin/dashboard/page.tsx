@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ScubiduPapaLayout } from "@/components/scubidupapa";
 import { requireViewer } from "@/lib/auth";
+import { marketDay } from "@/lib/market";
 import { listBookings, listSpots } from "@/lib/market-data";
 import { occupancyByZone } from "@/lib/occupancy";
 import "./dashboard.css";
@@ -26,7 +27,7 @@ function selectedDate(param: string | string[] | undefined) {
       return param;
     }
   }
-  return new Date().toISOString().slice(0, 10);
+  return marketDay();
 }
 
 export default async function DashboardPage({

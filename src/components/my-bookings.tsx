@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { type Ref, useRef, useState } from "react";
 import { deleteBooking } from "@/app/bookings/actions";
-import type { Booking } from "@/lib/market";
+import { type Booking, marketDay } from "@/lib/market";
 import BookingCancelDialog from "./booking-cancel-dialog";
 import { CalendarIcon, PinIcon } from "./icons";
 
@@ -23,10 +23,6 @@ const weekdayDate = new Intl.DateTimeFormat("en-GB", {
   timeZone: "UTC",
 });
 // createdAt is a real moment in time, so show it in Thai time
-const bookedOnKey = (iso: string) =>
-  new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok" }).format(
-    new Date(iso),
-  );
 const bookedOnLong = (iso: string) =>
   new Intl.DateTimeFormat("en-GB", {
     day: "numeric",
@@ -222,7 +218,7 @@ function ReservationCard({
         </span>
         {booking.createdAt ? (
           <span className="text-dark-wine">
-            booked on: {bookedOnKey(booking.createdAt)}
+            booked on: {marketDay(new Date(booking.createdAt))}
           </span>
         ) : null}
       </div>
@@ -297,7 +293,7 @@ function BookingDetails({
         </div>
 
         <div className="flex flex-wrap justify-between gap-3">
-          {canEdit && spot?.isActive ? (
+          {canEdit ? (
             <Link
               href={`${list}/${booking._id}/edit`}
               className="inline-flex min-h-11 items-center rounded-[5px] bg-dark-wine px-4 text-[13px] font-semibold text-paper hover:bg-coffee-bean"

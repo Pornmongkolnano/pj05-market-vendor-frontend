@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import BookingForm from "@/components/booking-form";
 import BookingPage from "@/components/booking-page";
 import { requireViewer } from "@/lib/auth";
-import { isObjectId } from "@/lib/market";
+import { isObjectId, marketDay } from "@/lib/market";
 import { listSpots } from "@/lib/market-data";
 import { createBooking } from "../actions";
 
@@ -19,15 +19,17 @@ export default async function NewBookingPage({
 
   const spots = await listSpots();
   const selectedSpot = spots.find((entry) => entry._id === selectedId);
+  const today = marketDay();
   return (
     <BookingPage title="Book a spot">
       {spots.length ? (
         <BookingForm
           action={createBooking}
+          minDate={today}
           spots={spots}
           initial={{
             spot: selectedSpot?._id ?? "",
-            bookingDate: new Date().toISOString().slice(0, 10),
+            bookingDate: today,
             productType: "",
           }}
           cancelPath="/spots"
