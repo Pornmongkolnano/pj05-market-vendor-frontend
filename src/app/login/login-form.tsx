@@ -1,11 +1,13 @@
 "use client";
 
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { type SubmitEvent, useState } from "react";
 
 const unavailable = "Login is temporarily unavailable. Please try again.";
 
 export default function LoginForm({ destination }: { destination: string }) {
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,7 +28,8 @@ export default function LoginForm({ destination }: { destination: string }) {
       });
 
       if (response?.ok && !response.error) {
-        window.location.replace(destination);
+        router.replace(destination);
+        router.refresh();
         return;
       }
 

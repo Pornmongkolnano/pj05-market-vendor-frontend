@@ -1,9 +1,11 @@
 "use client";
 
 import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export function useLogout() {
+	const router = useRouter();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [failed, setFailed] = useState(false);
 
@@ -21,7 +23,8 @@ export function useLogout() {
 			if (destination.pathname !== "/login") {
 				throw new Error("NextAuth did not complete sign-out");
 			}
-			window.location.replace("/login");
+			router.replace("/login");
+			router.refresh();
 		} catch {
 			setFailed(true);
 			setIsSubmitting(false);
