@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { deleteBooking } from "@/app/bookings/actions";
 import { type Booking, formatBookingDate } from "@/lib/market";
+import AdminBookingDelete from "./admin-booking-delete";
 import DeleteConfirmation from "./delete-confirmation";
 
 const notices: Record<string, string> = {
@@ -72,11 +73,19 @@ export default function BookingList({
                 >
                   แก้ไข
                 </Link>
-                <DeleteConfirmation
-                  label="ลบการจอง"
-                  prompt="ยืนยันลบรายการจองนี้หรือไม่"
-                  action={deleteBooking.bind(null, booking._id, admin)}
-                />
+                {admin ? (
+                  <AdminBookingDelete
+                    action={deleteBooking.bind(null, booking._id, true)}
+                    bookingDate={booking.bookingDate}
+                    spotNumber={booking.spot?.spotNumber}
+                  />
+                ) : (
+                  <DeleteConfirmation
+                    label="ลบการจอง"
+                    prompt="ยืนยันลบรายการจองนี้หรือไม่"
+                    action={deleteBooking.bind(null, booking._id, false)}
+                  />
+                )}
               </div>
             </li>
           ))}
