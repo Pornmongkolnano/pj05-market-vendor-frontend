@@ -17,25 +17,6 @@ type BookingFormValues = {
   productType: string;
 };
 
-const copy = {
-  standard: {
-    spot: "พื้นที่ขาย",
-    placeholder: "เลือกพื้นที่ขาย",
-    date: "วันที่จอง",
-    category: "ประเภทสินค้า",
-    cancel: "ยกเลิก",
-    pending: "กำลังบันทึก…",
-  },
-  market: {
-    spot: "Spot",
-    placeholder: "Choose a spot",
-    date: "Market date",
-    category: "Product category",
-    cancel: "Cancel",
-    pending: "Saving…",
-  },
-};
-
 const marketField =
   "mt-2 block min-h-11 w-full rounded-md border border-line bg-paper px-3 py-2 text-base focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-dark-wine";
 const feeFormat = new Intl.NumberFormat("en-GB", { maximumFractionDigits: 2 });
@@ -100,7 +81,6 @@ export default function BookingForm({
   initial,
   cancelPath,
   submitLabel,
-  appearance = "standard",
   children,
 }: {
   action: FormMutation;
@@ -108,14 +88,10 @@ export default function BookingForm({
   initial: BookingFormValues;
   cancelPath: string;
   submitLabel: string;
-  appearance?: "standard" | "market";
   children?: ReactNode;
 }) {
   const [state, submit, pending] = useActionState(action, null);
   const [spotId, setSpotId] = useState(initial.spot);
-  const isMarket = appearance === "market";
-  const labels = copy[appearance];
-  const controlClass = isMarket ? marketField : "form-input";
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -129,24 +105,15 @@ export default function BookingForm({
     <form
       method="post"
       onSubmit={handleSubmit}
-      className={
-        isMarket
-          ? "space-y-5 rounded-lg border border-line bg-paper p-5 sm:p-6"
-          : "panel mt-5 max-w-xl space-y-4"
-      }
+      className="space-y-5 rounded-lg border border-line bg-paper p-5 sm:p-6"
     >
-      {isMarket ? (
-        <h2 className="font-display text-[28px] leading-tight font-medium">
-          Booking details
-        </h2>
-      ) : null}
-      <fieldset
-        disabled={pending}
-        className={isMarket ? "grid gap-4 sm:grid-cols-2" : "space-y-4"}
-      >
+      <h2 className="font-display text-[28px] leading-tight font-medium">
+        Booking details
+      </h2>
+      <fieldset disabled={pending} className="grid gap-4 sm:grid-cols-2">
         <div className="min-w-0">
           <label htmlFor="booking-spot" className="text-sm font-medium">
-            {labels.spot}
+            Spot
           </label>
           <select
             id="booking-spot"
@@ -154,23 +121,21 @@ export default function BookingForm({
             value={spotId}
             onChange={(event) => setSpotId(event.currentTarget.value)}
             required
-            className={controlClass}
+            className={marketField}
           >
             <option value="" disabled>
-              {labels.placeholder}
+              Choose a spot
             </option>
             {spots.map((spot) => (
               <option key={spot._id} value={spot._id}>
-                {isMarket
-                  ? `${spot.spotNumber} · ${spot.zone}`
-                  : `แผง ${spot.spotNumber} · โซน ${spot.zone}`}
+                {spot.spotNumber} · {spot.zone}
               </option>
             ))}
           </select>
         </div>
         <div className="min-w-0">
           <label htmlFor="booking-date" className="text-sm font-medium">
-            {labels.date}
+            Market date
           </label>
           <input
             id="booking-date"
@@ -178,20 +143,20 @@ export default function BookingForm({
             type="date"
             defaultValue={initial.bookingDate}
             required
-            className={controlClass}
+            className={marketField}
           />
         </div>
         <div className="min-w-0 sm:col-span-2">
           <label htmlFor="booking-product" className="text-sm font-medium">
-            {labels.category}
+            Product category
           </label>
           <input
             id="booking-product"
             name="productType"
             defaultValue={initial.productType}
-            placeholder={isMarket ? "e.g. Food and drinks" : undefined}
+            placeholder="e.g. Food and drinks"
             required
-            className={controlClass}
+            className={marketField}
           />
         </div>
       </fieldset>
@@ -203,39 +168,23 @@ export default function BookingForm({
           {state.error}
         </p>
       ) : null}
-      <div
-        className={
-          isMarket
-            ? "flex flex-wrap gap-3 border-t border-line pt-5"
-            : "flex flex-wrap gap-3"
-        }
-      >
+      <div className="flex flex-wrap gap-3 border-t border-line pt-5">
         <button
           type="submit"
           disabled={pending}
-          className={
-            isMarket
-              ? "min-h-11 rounded-md bg-dark-wine px-5 py-2.5 text-sm font-semibold text-paper hover:bg-coffee-bean disabled:opacity-60"
-              : "button-primary"
-          }
+          className="min-h-11 rounded-md bg-dark-wine px-5 py-2.5 text-sm font-semibold text-paper hover:bg-coffee-bean disabled:opacity-60"
         >
-          {pending ? labels.pending : submitLabel}
+          {pending ? "Saving…" : submitLabel}
         </button>
         <Link
           href={cancelPath}
-          className={
-            isMarket
-              ? "inline-flex min-h-11 items-center rounded-md border border-line px-4 py-2.5 text-sm font-medium hover:bg-linen"
-              : "button-secondary"
-          }
+          className="inline-flex min-h-11 items-center rounded-md border border-line px-4 py-2.5 text-sm font-medium hover:bg-linen"
         >
-          {labels.cancel}
+          Cancel
         </Link>
       </div>
     </form>
   );
-
-  if (!isMarket) return form;
 
   return (
     <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">

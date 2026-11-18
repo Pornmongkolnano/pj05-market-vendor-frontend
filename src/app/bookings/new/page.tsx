@@ -36,7 +36,6 @@ export default async function NewBookingPage({
           }}
           cancelPath="/spots"
           submitLabel="Book spot"
-          appearance="market"
         />
       ) : (
         <p className="mt-6 rounded-lg border border-line bg-paper px-5 py-4 text-sm text-taupe">
