@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { type Ref, useRef, useState } from "react";
 import { deleteBooking } from "@/app/bookings/actions";
 import type { Booking } from "@/lib/market";
 import DeleteConfirmation from "./delete-confirmation";
@@ -49,6 +49,7 @@ export default function MyBookings({
 }) {
   const [tab, setTab] = useState<Tab>("upcoming");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const detailsRef = useRef<HTMLElement>(null);
 
   const upcoming = bookings
     .filter((b) => dayKey(b.bookingDate) >= today)
@@ -64,6 +65,16 @@ export default function MyBookings({
   function openTab(next: Tab) {
     setTab(next);
     setSelectedId(null);
+  }
+
+  function selectBooking(id: string) {
+    setSelectedId(id);
+    if (window.matchMedia("(min-width: 64rem)").matches) return;
+
+    requestAnimationFrame(() => {
+      detailsRef.current?.focus({ preventScroll: true });
+      detailsRef.current?.scrollIntoView({ block: "start" });
+    });
   }
 
   return (
@@ -122,7 +133,7 @@ export default function MyBookings({
                   booking={booking}
                   selected={booking._id === selected?._id}
                   admin={admin}
-                  onSelect={() => setSelectedId(booking._id)}
+                  onSelect={() => selectBooking(booking._id)}
                 />
               </li>
             ))}
@@ -132,6 +143,7 @@ export default function MyBookings({
               booking={selected}
               canEdit={tab === "upcoming"}
               admin={admin}
+              panelRef={detailsRef}
             />
           ) : null}
         </div>
@@ -222,10 +234,12 @@ function BookingDetails({
   booking,
   canEdit,
   admin,
+  panelRef,
 }: {
   booking: Booking;
   canEdit: boolean;
   admin: boolean;
+  panelRef: Ref<HTMLElement>;
 }) {
   const list = admin ? "/admin/bookings" : "/bookings";
   const { spot } = booking;
@@ -238,7 +252,12 @@ function BookingDetails({
   ];
 
   return (
-    <aside className="overflow-hidden rounded-lg border border-line bg-paper lg:sticky lg:top-24">
+    <aside
+      ref={panelRef}
+      tabIndex={-1}
+      aria-label="Booking details"
+      className="scroll-mt-36 overflow-hidden rounded-lg border border-line bg-paper lg:sticky lg:top-24"
+    >
       <div className="flex flex-col gap-2.5 bg-dark-wine px-[26px] py-6">
         <p className="text-[10px] leading-[1.45] font-bold tracking-[1.4px] text-light-apricot">
           BOOKING DETAILS
