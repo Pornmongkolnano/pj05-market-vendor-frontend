@@ -1,5 +1,6 @@
 import { updateBooking } from "@/app/bookings/actions";
 import { requireViewer } from "@/lib/auth";
+import { marketDay } from "@/lib/market";
 import { listSpots, readBooking } from "@/lib/market-data";
 import BookingForm from "./booking-form";
 import BookingPage from "./booking-page";
@@ -41,11 +42,14 @@ export default async function EditBooking({
           role="status"
           className="mt-4 rounded-md bg-linen p-3 text-sm text-dark-wine"
         >
-          The original spot is no longer available. Choose a different spot.
+          {spots.length
+            ? "The original spot is no longer available. Choose a different spot."
+            : "There are no active spots to move this booking to."}
         </p>
       ) : null}
       <BookingForm
         action={action}
+        minDate={marketDay()}
         spots={spots}
         initial={initial}
         cancelPath={list}

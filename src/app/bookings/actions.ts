@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { type MutationState, textField } from "@/components/action-state";
 import { loginPath, requireViewer } from "@/lib/auth";
-import { isObjectId } from "@/lib/market";
+import { isObjectId, marketDay } from "@/lib/market";
 import { Pj05Error, pj05Data } from "@/lib/pj05";
 
 const errors: Record<string, string> = {
@@ -50,6 +50,15 @@ function readValues(data: FormData) {
   };
 }
 
+function validateValues(values: ReturnType<typeof readValues>) {
+  if (!isObjectId(values.spot) || !values.bookingDate || !values.productType) {
+    return "กรุณาเลือกพื้นที่ วันที่จอง และระบุประเภทสินค้า";
+  }
+  if (values.bookingDate < marketDay()) {
+    return errors["Booking date cannot be in the past"];
+  }
+}
+
 function revalidateBookings() {
   revalidatePath("/bookings");
   revalidatePath("/admin/bookings");
@@ -61,9 +70,8 @@ export async function createBooking(
   data: FormData,
 ): Promise<MutationState> {
   const values = readValues(data);
-  if (!isObjectId(values.spot) || !values.bookingDate || !values.productType) {
-    return { error: "กรุณาเลือกพื้นที่ วันที่จอง และระบุประเภทสินค้า" };
-  }
+  const error = validateValues(values);
+  if (error) return { error };
 
   const page = `/bookings/new?spot=${values.spot}`;
   const account = await bookingAccount(page, "member");
@@ -89,9 +97,8 @@ export async function updateBooking(
 ): Promise<MutationState> {
   if (!isObjectId(id)) return { error: "ไม่พบรายการจองนี้" };
   const values = readValues(data);
-  if (!isObjectId(values.spot) || !values.bookingDate || !values.productType) {
-    return { error: "กรุณาเลือกพื้นที่ วันที่จอง และระบุประเภทสินค้า" };
-  }
+  const error = validateValues(values);
+  if (error) return { error };
 
   const list = admin ? "/admin/bookings" : "/bookings";
   const page = `${list}/${id}/edit`;

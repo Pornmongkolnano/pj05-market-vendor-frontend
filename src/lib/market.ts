@@ -28,6 +28,14 @@ const dateFormat = new Intl.DateTimeFormat("th-TH", {
   timeZone: "UTC",
 });
 
+const marketDayFormat = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Bangkok",
+});
+
+export function marketDay(date = new Date()) {
+  return marketDayFormat.format(date);
+}
+
 export function formatFee(fee: number) {
   return feeFormat.format(fee);
 }

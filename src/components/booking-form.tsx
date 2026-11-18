@@ -78,12 +78,14 @@ export default function BookingForm({
   action,
   spots,
   initial,
+  minDate,
   cancelPath,
   submitLabel,
 }: {
   action: FormMutation;
   spots: Spot[];
   initial: BookingFormValues;
+  minDate: string;
   cancelPath: string;
   submitLabel: string;
 }) {
@@ -139,6 +141,7 @@ export default function BookingForm({
             name="bookingDate"
             type="date"
             defaultValue={initial.bookingDate}
+            min={minDate}
             required
             className={marketField}
           />
