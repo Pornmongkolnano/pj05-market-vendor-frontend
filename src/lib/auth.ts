@@ -10,30 +10,6 @@ import { cache } from "react";
 import { isRole, type Role, type Viewer } from "./auth-types";
 import { Pj05Error, pj05Data } from "./pj05";
 
-async function fetchViewer(token: string): Promise<Viewer> {
-  const profile = await pj05Data<{
-    _id?: unknown;
-    name?: unknown;
-    email?: unknown;
-    role?: unknown;
-  } | null>("auth/me", { token });
-
-  if (
-    typeof profile?._id !== "string" ||
-    typeof profile.name !== "string" ||
-    typeof profile.email !== "string" ||
-    !isRole(profile.role)
-  ) {
-    throw new Pj05Error(502);
-  }
-  return {
-    id: profile._id,
-    name: profile.name,
-    email: profile.email,
-    role: profile.role,
-  };
-}
-
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   session: { strategy: "jwt", maxAge: 2 * 60 * 60 },
@@ -51,18 +27,27 @@ export const authOptions: NextAuthOptions = {
         if (!email || !password) return null;
 
         try {
-          const login = await pj05Data<{ token?: unknown } | null>(
+          const login = await pj05Data<Record<string, unknown> | null>(
             "auth/login",
-            {
-              method: "POST",
-              body: { email, password },
-            },
+            { method: "POST", body: { email, password } },
           );
-          if (typeof login?.token !== "string" || !login.token) {
+          if (
+            !login ||
+            typeof login.id !== "string" || !login.id ||
+            typeof login.name !== "string" || !login.name ||
+            typeof login.email !== "string" || !login.email ||
+            !isRole(login.role) ||
+            typeof login.token !== "string" || !login.token
+          ) {
             throw new Pj05Error(502);
           }
-          const viewer = await fetchViewer(login.token);
-          return { ...viewer, backendToken: login.token };
+          return {
+            id: login.id,
+            name: login.name,
+            email: login.email,
+            role: login.role,
+            backendToken: login.token,
+          };
         } catch (error) {
           if (error instanceof Pj05Error) {
             if (error.status === 400 || error.status === 401) return null;

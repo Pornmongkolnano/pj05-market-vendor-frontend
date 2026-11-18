@@ -30,7 +30,7 @@ npm run build
 
 ผู้เยี่ยมชมเลือก Member หรือ Admin ได้จากฟอร์ม `/register` ฟอร์มส่ง `name`, `email`, `tel`, `role` และ `password` ไปที่ `POST /api/v1/auth/register` ซึ่ง Next.js ส่งต่อไปยังเส้นทางเดียวกันบน Express เมื่อสมัครสำเร็จ ผู้เยี่ยมชมจะไปยังหน้า Login โหมด `npm run dev` ใช้ `http://127.0.0.1:5050` เป็นค่าเริ่มต้น ส่วน production อ่าน `BACKEND_URL` จาก environment ของเซิร์ฟเวอร์
 
-NextAuth Credentials ใช้ `POST /api/v1/auth/login` ตรวจรหัสผ่านและใช้ Bearer token อ่านบัญชีจาก `GET /api/v1/auth/me` ก่อนอนุญาตให้เข้าหน้าส่วนตัวและหน้าแอดมิน การออกจากระบบล้าง session cookie ของ NextAuth
+NextAuth Credentials ใช้ `POST /api/v1/auth/login` ตรวจรหัสผ่าน แล้วใช้ ID ชื่อ อีเมล และบทบาทจากผลล็อกอินสร้าง session ส่วนเซิร์ฟเวอร์เก็บ Bearer token ไว้เรียก API ที่ต้องยืนยันตัวตน การออกจากระบบล้าง session cookie ของ NextAuth
 
 ## เส้นทางเดโม
 
