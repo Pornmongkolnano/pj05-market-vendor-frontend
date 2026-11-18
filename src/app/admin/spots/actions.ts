@@ -29,7 +29,6 @@ function failure(error: unknown, page: string): MutationState {
 
 function refreshSpots() {
   revalidatePath("/spots");
-  revalidatePath("/spots/[id]", "page");
   revalidatePath("/admin/spots");
   revalidatePath("/admin/dashboard");
 }
