@@ -54,7 +54,6 @@ const initialValues: RegistrationValues = {
 const submitMessages = {
   emailInUse: "This email address is already registered.",
   invalid: "Check your registration details and try again.",
-  adminRequired: "An admin must sign in to create an Admin account.",
   rateLimited: "Too many registration attempts. Please try again later.",
   unavailable: "Registration is temporarily unavailable. Please try again.",
 };
@@ -68,13 +67,7 @@ function focusField(form: HTMLFormElement, name: FieldName) {
   }
 }
 
-export default function RegisterForm({
-  canRegisterAdmin,
-  successUrl,
-}: {
-  canRegisterAdmin: boolean;
-  successUrl: string;
-}) {
+export default function RegisterForm({ successUrl }: { successUrl: string }) {
   const router = useRouter();
   const [values, setValues] = useState<RegistrationValues>(initialValues);
   const [hasChecked, setHasChecked] = useState(false);
@@ -112,7 +105,7 @@ export default function RegisterForm({
     setSubmitStatus("submitting");
 
     try {
-      const response = await fetch("/api/auth/register", {
+      const response = await fetch("/api/v1/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
@@ -124,10 +117,6 @@ export default function RegisterForm({
           break;
         case 400:
           setSubmitStatus("invalid");
-          break;
-        case 401:
-        case 403:
-          setSubmitStatus("adminRequired");
           break;
         case 409:
           setSubmitStatus("emailInUse");
@@ -162,7 +151,6 @@ export default function RegisterForm({
                   id={name}
                   name={name}
                   className="market-control"
-                  aria-describedby="role-hint"
                   required
                   disabled={isSubmitting}
                   value={values.role}
@@ -170,18 +158,12 @@ export default function RegisterForm({
                     const role = event.currentTarget.value;
                     if (isRole(role)) {
                       setValues((previous) => ({ ...previous, role }));
-                      if (submitStatus === "adminRequired") setSubmitStatus(null);
                     }
                   }}
                 >
                   <option value="member">Member</option>
-                  <option value="admin" disabled={!canRegisterAdmin}>
-                    Admin
-                  </option>
+                  <option value="admin">Admin</option>
                 </select>
-                <p id="role-hint" className="market-hint">
-                  Admin requires a signed-in admin.
-                </p>
               </div>
             );
           }
