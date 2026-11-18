@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { deleteBooking, updateBooking } from "@/app/bookings/actions";
 import { requireViewer } from "@/lib/auth";
 import { listSpots, readBooking } from "@/lib/market-data";
@@ -31,30 +30,31 @@ export default async function EditBooking({
   };
   const action = updateBooking.bind(null, id, admin);
 
-  if (admin) {
-    return (
-      <BookingPage
-        title="Edit booking"
-        backPath={list}
-        backLabel="Manage bookings"
-        subtitle={booking.user ? `Booked by ${booking.user.name}` : undefined}
-      >
-        {!selectedSpot ? (
-          <p
-            role="status"
-            className="mt-4 rounded-md bg-linen p-3 text-sm text-dark-wine"
-          >
-            The original spot is no longer available. Choose a different spot.
-          </p>
-        ) : null}
-        <BookingForm
-          action={action}
-          spots={spots}
-          initial={initial}
-          cancelPath={list}
-          submitLabel="Save changes"
-          appearance="market"
+  return (
+    <BookingPage
+      title="Edit booking"
+      backPath={list}
+      backLabel={admin ? "Manage bookings" : "My bookings"}
+      subtitle={
+        admin && booking.user ? `Booked by ${booking.user.name}` : undefined
+      }
+    >
+      {!selectedSpot ? (
+        <p
+          role="status"
+          className="mt-4 rounded-md bg-linen p-3 text-sm text-dark-wine"
         >
+          The original spot is no longer available. Choose a different spot.
+        </p>
+      ) : null}
+      <BookingForm
+        action={action}
+        spots={spots}
+        initial={initial}
+        cancelPath={list}
+        submitLabel="Save changes"
+      >
+        {admin ? (
           <section
             aria-labelledby="delete-booking-heading"
             className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-line bg-paper px-5 py-4 sm:px-6"
@@ -76,29 +76,8 @@ export default async function EditBooking({
               spotNumber={booking.spot?.spotNumber}
             />
           </section>
-        </BookingForm>
-      </BookingPage>
-    );
-  }
-
-  return (
-    <main className="page-shell">
-      <Link href={list} className="text-link text-sm">
-        กลับรายการจอง
-      </Link>
-      <h1 className="mt-3 text-3xl font-semibold">แก้ไขการจอง</h1>
-      {!selectedSpot ? (
-        <p className="mt-3 text-sm text-amber-800">
-          พื้นที่เดิมปิดใช้งาน กรุณาเลือกพื้นที่ใหม่
-        </p>
-      ) : null}
-      <BookingForm
-        action={action}
-        spots={spots}
-        initial={initial}
-        cancelPath={list}
-        submitLabel="บันทึกการแก้ไข"
-      />
-    </main>
+        ) : null}
+      </BookingForm>
+    </BookingPage>
   );
 }

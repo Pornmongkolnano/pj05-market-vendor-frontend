@@ -68,10 +68,15 @@ export default async function DashboardPage({
     <ScubiduPapaLayout>
       <main className="market-dashboard-content">
         <div className="market-dashboard-heading">
-          <Link href="/admin" className="market-dashboard-back-link">
-            <span aria-hidden="true">‹</span> Market management
+          <Link href="/account" className="market-dashboard-back-link">
+            <span aria-hidden="true">‹</span> My account
           </Link>
           <h1>Market dashboard</h1>
+          {params.account === "created" ? (
+            <p role="status" className="market-success-notice">
+              Account created successfully.
+            </p>
+          ) : null}
         </div>
         <form action={dashboard} className="market-dashboard-filters">
           <div className="market-field market-dashboard-date-field">

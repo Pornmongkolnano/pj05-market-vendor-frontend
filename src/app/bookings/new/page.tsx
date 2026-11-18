@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import BookingForm from "@/components/booking-form";
 import BookingPage from "@/components/booking-page";
 import { requireViewer } from "@/lib/auth";
@@ -13,7 +14,8 @@ export default async function NewBookingPage({
   const path = selectedId
     ? `/bookings/new?spot=${selectedId}`
     : "/bookings/new";
-  await requireViewer(path, "member");
+  const { viewer } = await requireViewer(path);
+  if (viewer.role === "admin") redirect("/admin/dashboard");
 
   const spots = await listSpots();
   const selectedSpot = spots.find((entry) => entry._id === selectedId);
@@ -34,7 +36,6 @@ export default async function NewBookingPage({
           }}
           cancelPath="/spots"
           submitLabel="Book spot"
-          appearance="market"
         />
       ) : (
         <p className="mt-6 rounded-lg border border-line bg-paper px-5 py-4 text-sm text-taupe">

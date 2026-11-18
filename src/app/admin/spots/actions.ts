@@ -30,7 +30,6 @@ function failure(error: unknown, page: string): MutationState {
 function refreshSpots() {
   updateTag("spots");
   revalidatePath("/spots");
-  revalidatePath("/spots/[id]", "page");
   revalidatePath("/admin/spots");
   revalidatePath("/admin/dashboard");
 }

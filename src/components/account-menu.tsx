@@ -33,16 +33,16 @@ export default function AccountMenu({ name }: { name: string }) {
 				onClick={() => setOpen((value) => !value)}
 				aria-expanded={open}
 				aria-haspopup="true"
-				className="flex items-center gap-2.5 text-sm leading-[1.45] font-medium whitespace-nowrap text-sand hover:text-light-apricot cursor-pointer"
+				className="flex max-w-full cursor-pointer items-center gap-2.5 text-sm leading-[1.45] font-medium text-sand hover:text-light-apricot"
 			>
-				Hello, {name}
+				<span className="min-w-0 truncate">Hello, {name}</span>
 				<svg
 					width="18"
 					height="18"
 					viewBox="0 0 18 18"
 					fill="none"
 					aria-hidden="true"
-					className={`transition-transform ${open ? "rotate-180" : ""}`}
+					className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
 				>
 					<path
 						d="M5 7l4 4 4-4"
