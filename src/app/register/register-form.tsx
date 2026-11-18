@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { type SubmitEvent, useState } from "react";
+import { isRole } from "@/lib/auth-types";
 import {
   minimumPasswordLength,
   type RegistrationValues,
@@ -30,6 +31,7 @@ const fields = [
     type: "tel",
     autoComplete: "tel",
   },
+  { name: "role", label: "Role", type: "select" },
   {
     name: "password",
     label: "Password",
@@ -45,12 +47,14 @@ const initialValues: RegistrationValues = {
   name: "",
   email: "",
   tel: "",
+  role: "member",
   password: "",
 };
 
 const submitMessages = {
   emailInUse: "This email address is already registered.",
   invalid: "Check your registration details and try again.",
+  adminRequired: "An admin must sign in to create an Admin account.",
   rateLimited: "Too many registration attempts. Please try again later.",
   unavailable: "Registration is temporarily unavailable. Please try again.",
 };
@@ -59,12 +63,18 @@ type SubmitStatus = "submitting" | keyof typeof submitMessages | null;
 
 function focusField(form: HTMLFormElement, name: FieldName) {
   const input = form.elements.namedItem(name);
-  if (input instanceof HTMLInputElement) {
+  if (input instanceof HTMLInputElement || input instanceof HTMLSelectElement) {
     input.focus();
   }
 }
 
-export default function RegisterForm({ successUrl }: { successUrl: string }) {
+export default function RegisterForm({
+  canRegisterAdmin,
+  successUrl,
+}: {
+  canRegisterAdmin: boolean;
+  successUrl: string;
+}) {
   const router = useRouter();
   const [values, setValues] = useState<RegistrationValues>(initialValues);
   const [hasChecked, setHasChecked] = useState(false);
@@ -78,7 +88,7 @@ export default function RegisterForm({ successUrl }: { successUrl: string }) {
       ? submitMessages[submitStatus]
       : null;
 
-  function updateField(name: FieldName, value: string) {
+  function updateField(name: Exclude<FieldName, "role">, value: string) {
     setValues((previous) => ({ ...previous, [name]: value }));
     if (name === "email" && duplicateEmail) {
       setSubmitStatus(null);
@@ -115,6 +125,10 @@ export default function RegisterForm({ successUrl }: { successUrl: string }) {
         case 400:
           setSubmitStatus("invalid");
           break;
+        case 401:
+        case 403:
+          setSubmitStatus("adminRequired");
+          break;
         case 409:
           setSubmitStatus("emailInUse");
           focusField(form, "email");
@@ -138,7 +152,40 @@ export default function RegisterForm({ successUrl }: { successUrl: string }) {
       className="market-auth-form"
     >
       <div className="market-fields">
-        {fields.map(({ name, label, placeholder, type, autoComplete }) => {
+        {fields.map((field) => {
+          const { name, label, type } = field;
+          if (type === "select") {
+            return (
+              <div key={name} className="market-field">
+                <label htmlFor={name}>{label}</label>
+                <select
+                  id={name}
+                  name={name}
+                  className="market-control"
+                  aria-describedby="role-hint"
+                  required
+                  disabled={isSubmitting}
+                  value={values.role}
+                  onChange={(event) => {
+                    const role = event.currentTarget.value;
+                    if (isRole(role)) {
+                      setValues((previous) => ({ ...previous, role }));
+                      if (submitStatus === "adminRequired") setSubmitStatus(null);
+                    }
+                  }}
+                >
+                  <option value="member">Member</option>
+                  <option value="admin" disabled={!canRegisterAdmin}>
+                    Admin
+                  </option>
+                </select>
+                <p id="role-hint" className="market-hint">
+                  Admin requires a signed-in admin.
+                </p>
+              </div>
+            );
+          }
+
           const error =
             name === "email" && duplicateEmail
               ? submitMessages.emailInUse
@@ -155,8 +202,8 @@ export default function RegisterForm({ successUrl }: { successUrl: string }) {
                 id={name}
                 name={name}
                 type={type}
-                autoComplete={autoComplete}
-                placeholder={placeholder}
+                autoComplete={field.autoComplete}
+                placeholder={field.placeholder}
                 required
                 readOnly={isSubmitting}
                 value={values[name]}

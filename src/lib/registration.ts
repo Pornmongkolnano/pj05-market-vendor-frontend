@@ -1,7 +1,10 @@
+import type { Role } from "./auth-types";
+
 export type RegistrationValues = {
   name: string;
   email: string;
   tel: string;
+  role: Role;
   password: string;
 };
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ScubiduPapaAuthPage } from "@/components/scubidupapa";
+import { getSessionViewer } from "@/lib/auth";
 import { loginDestination } from "@/lib/auth-types";
 import RegisterForm from "./register-form";
 
@@ -10,7 +11,9 @@ export const metadata: Metadata = {
 export default async function RegisterPage({
   searchParams,
 }: PageProps<"/register">) {
-  const destination = loginDestination((await searchParams).next);
+  const [params, viewer] = await Promise.all([searchParams, getSessionViewer()]);
+  const destination = loginDestination(params.next);
+  const canRegisterAdmin = viewer?.role === "admin";
   const nextQuery = destination
     ? `?${new URLSearchParams({ next: destination })}`
     : "";
@@ -22,7 +25,10 @@ export default async function RegisterPage({
       mode="register"
       alternateUrl={`/login${nextQuery}`}
     >
-      <RegisterForm successUrl={`/login?${successParams}`} />
+      <RegisterForm
+        canRegisterAdmin={canRegisterAdmin}
+        successUrl={canRegisterAdmin ? "/admin?account=created" : `/login?${successParams}`}
+      />
     </ScubiduPapaAuthPage>
   );
 }
