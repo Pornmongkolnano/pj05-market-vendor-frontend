@@ -1,8 +1,7 @@
-import Link from "next/link";
 import { getSessionViewer } from "@/lib/auth";
 import AccountMenu from "./account-menu";
 import BrandWordmark from "./brand-wordmark";
-import NavLinks, { type NavItem } from "./nav-links";
+import NavLinks, { GuestAuthLinks, type NavItem } from "./nav-links";
 
 const memberLinks: NavItem[] = [
 	{ href: "/spots", label: "Explore spots" },
@@ -12,6 +11,7 @@ const memberLinks: NavItem[] = [
 const adminLinks: NavItem[] = [
 	{ href: "/admin/spots", label: "Manage spots" },
 	{ href: "/admin/bookings", label: "Manage bookings" },
+	{ href: "/admin/dashboard", label: "Dashboard" },
 ];
 
 // Server component: reads the session on the server, then picks the links to show.
@@ -39,17 +39,7 @@ export default async function SiteNavigation() {
 					{viewer ? (
 						<AccountMenu name={viewer.name} />
 					) : (
-						<div className="flex items-center gap-3 text-sm leading-[1.45] font-medium whitespace-nowrap text-sand">
-							<Link href="/register" className="hover:text-light-apricot">
-								Register
-							</Link>
-							<Link
-								href="/login"
-								className="rounded-[5px] bg-chocolate px-2 py-px hover:bg-camel"
-							>
-								Login
-							</Link>
-						</div>
+						<GuestAuthLinks />
 					)}
 				</div>
 			</nav>

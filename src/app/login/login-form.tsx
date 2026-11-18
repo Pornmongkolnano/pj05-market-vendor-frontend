@@ -3,9 +3,7 @@
 import { signIn } from "next-auth/react";
 import { type SubmitEvent, useState } from "react";
 
-const unavailable = "เข้าสู่ระบบไม่ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง";
-const inputStyle =
-  "mt-1.5 block min-h-11 w-full rounded-lg border border-slate-500 px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900";
+const unavailable = "Login is temporarily unavailable. Please try again.";
 
 export default function LoginForm({ destination }: { destination: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,9 +31,9 @@ export default function LoginForm({ destination }: { destination: string }) {
       }
 
       if (response?.error === "CredentialsSignin") {
-        setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+        setError("The email address or password is incorrect.");
       } else if (response?.error === "RateLimited") {
-        setError("มีคำขอเข้าสู่ระบบมากเกินไป กรุณาลองใหม่ภายหลัง");
+        setError("Too many login attempts. Please try again later.");
       } else {
         setError(unavailable);
       }
@@ -46,48 +44,44 @@ export default function LoginForm({ destination }: { destination: string }) {
   }
 
   return (
-    <form method="post" onSubmit={handleSubmit} className="mt-6 space-y-4">
-      <div>
-        <label htmlFor="login-email" className="block text-sm font-medium">
-          อีเมล
-        </label>
-        <input
-          id="login-email"
-          name="email"
-          type="email"
-          autoComplete="username"
-          required
-          readOnly={isSubmitting}
-          className={inputStyle}
-        />
-      </div>
-      <div>
-        <label htmlFor="login-password" className="block text-sm font-medium">
-          รหัสผ่าน
-        </label>
-        <input
-          id="login-password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          readOnly={isSubmitting}
-          className={inputStyle}
-        />
+    <form method="post" onSubmit={handleSubmit} className="market-auth-form">
+      <div className="market-fields">
+        <div className="market-field">
+          <label htmlFor="login-email">Email address</label>
+          <input
+            id="login-email"
+            name="email"
+            type="email"
+            autoComplete="username"
+            placeholder="you@example.com"
+            required
+            readOnly={isSubmitting}
+            className="market-control"
+          />
+        </div>
+        <div className="market-field">
+          <label htmlFor="login-password">Password</label>
+          <input
+            id="login-password"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            placeholder="Enter your password"
+            required
+            readOnly={isSubmitting}
+            className="market-control"
+          />
+        </div>
       </div>
       <button
         type="submit"
         disabled={isSubmitting}
-        className="min-h-11 w-full rounded-lg bg-slate-900 px-4 py-2.5 font-medium text-white enabled:hover:bg-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:opacity-70"
+        className="market-primary-action"
       >
-        {isSubmitting ? "กำลังเข้าสู่ระบบ…" : "เข้าสู่ระบบ"}
+        {isSubmitting ? "Logging in…" : "Login"}
       </button>
       <div role="status">
-        {error ? (
-          <p className="rounded-lg bg-red-50 px-3 py-2.5 text-sm text-red-900">
-            {error}
-          </p>
-        ) : null}
+        {error ? <p className="market-error-notice">{error}</p> : null}
       </div>
     </form>
   );
