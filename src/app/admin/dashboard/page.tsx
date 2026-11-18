@@ -1,12 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ScubiduPapaLayout } from "@/components/scubidupapa";
 import { requireViewer } from "@/lib/auth";
-import { formatBookingDate } from "@/lib/market";
 import { listBookings, listSpots } from "@/lib/market-data";
 import { occupancyByZone } from "@/lib/occupancy";
+import "./dashboard.css";
 
-export const metadata: Metadata = { title: "แดชบอร์ดตลาด" };
+export const metadata: Metadata = { title: "Market dashboard | ScubiduPapa" };
 const dashboard = "/admin/dashboard";
+const dateFormat = new Intl.DateTimeFormat("en-GB", {
+  dateStyle: "long",
+  timeZone: "UTC",
+});
+
+function zoneLabel(zone: string) {
+  return /^[a-z]$/i.test(zone) ? `Zone ${zone}` : zone;
+}
 
 function selectedDate(param: string | string[] | undefined) {
   if (typeof param === "string" && /^\d{4}-\d{2}-\d{2}$/.test(param)) {
@@ -49,116 +58,118 @@ export default async function DashboardPage({
     }),
     { active: 0, booked: 0, available: 0 },
   );
+  const metrics = [
+    { key: "active", label: "Active spots", value: totals.active },
+    { key: "booked", label: "Booked", value: totals.booked },
+    { key: "available", label: "Available", value: totals.available },
+  ];
 
   return (
-    <main className="page-shell">
-      <Link href="/admin" className="text-link text-sm">
-        กลับหน้าจัดการตลาด
-      </Link>
-      <h1 className="mt-3 text-3xl font-semibold">แดชบอร์ดตลาด</h1>
-      <form
-        action={dashboard}
-        className="panel mt-5 flex flex-wrap items-end gap-3"
-      >
-        <div>
-          <label htmlFor="dashboard-date" className="text-sm font-medium">
-            วันที่
-          </label>
-          <input
-            type="date"
-            name="date"
-            id="dashboard-date"
-            defaultValue={date}
-            required
-            className="form-input"
-          />
+    <ScubiduPapaLayout>
+      <main className="market-dashboard-content">
+        <div className="market-dashboard-heading">
+          <Link href="/admin" className="market-dashboard-back-link">
+            <span aria-hidden="true">‹</span> Market management
+          </Link>
+          <h1>Market dashboard</h1>
         </div>
-        <div>
-          <label htmlFor="dashboard-zone" className="text-sm font-medium">
-            โซน
-          </label>
-          <select
-            name="zone"
-            id="dashboard-zone"
-            defaultValue={zone}
-            className="form-input"
-          >
-            <option value="">ทุกโซน</option>
-            {zones.map((entry) => (
-              <option key={entry.zone} value={entry.zone}>
-                {entry.zone}
-              </option>
-            ))}
-          </select>
-        </div>
-        <button type="submit" className="button-primary">
-          แสดงผล
-        </button>
-      </form>
-
-      <section className="mt-7" aria-labelledby="occupancy-heading">
-        <h2 id="occupancy-heading" className="text-xl font-semibold">
-          {formatBookingDate(date)} · {zone ? `โซน ${zone}` : "ทุกโซน"}
-        </h2>
-        <dl className="mt-3 grid grid-cols-3 gap-2 sm:gap-4">
-          {[
-            { label: "แผงเปิดใช้", value: totals.active },
-            { label: "ถูกจอง", value: totals.booked },
-            { label: "แผงว่าง", value: totals.available },
-          ].map(({ label, value }) => (
-            <div
-              key={label}
-              className="rounded-xl border border-slate-200 bg-white p-3 sm:p-5"
-            >
-              <dt className="text-sm text-slate-600">{label}</dt>
-              <dd className="mt-1 text-3xl font-semibold tabular-nums">
-                {value}
-              </dd>
-            </div>
-          ))}
-        </dl>
-        <p className="mt-3 text-sm text-slate-600">
-          ยอดคำนวณจากแผงที่เปิดใช้อยู่ในปัจจุบัน
-        </p>
-
-        {rows.length === 0 ? (
-          <p className="mt-5">ยังไม่มีพื้นที่เปิดใช้งาน</p>
-        ) : (
-          <div className="mt-5 overflow-x-auto rounded-xl border border-slate-200 bg-white">
-            <table className="w-full text-sm tabular-nums">
-              <caption className="sr-only">จำนวนแผงตามโซนและวันที่เลือก</caption>
-              <thead className="border-b border-slate-200 bg-slate-100">
-                <tr>
-                  <th scope="col" className="p-3 text-left">
-                    โซน
-                  </th>
-                  <th scope="col" className="whitespace-nowrap p-3 text-right">
-                    เปิดใช้
-                  </th>
-                  <th scope="col" className="whitespace-nowrap p-3 text-right">
-                    ถูกจอง
-                  </th>
-                  <th scope="col" className="whitespace-nowrap p-3 text-right">
-                    ว่าง
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200">
-                {rows.map((row) => (
-                  <tr key={row.zone}>
-                    <th scope="row" className="wrap-break-word p-3 text-left">
-                      {row.zone}
-                    </th>
-                    <td className="p-3 text-right">{row.active}</td>
-                    <td className="p-3 text-right">{row.booked}</td>
-                    <td className="p-3 text-right">{row.available}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <form action={dashboard} className="market-dashboard-filters">
+          <div className="market-field market-dashboard-date-field">
+            <label htmlFor="dashboard-date">Date</label>
+            <input
+              type="date"
+              name="date"
+              id="dashboard-date"
+              defaultValue={date}
+              required
+              className="market-control"
+            />
           </div>
-        )}
-      </section>
-    </main>
+          <div className="market-field market-dashboard-zone-field">
+            <label htmlFor="dashboard-zone">Zone</label>
+            <div className="market-dashboard-select-control">
+              <select
+                name="zone"
+                id="dashboard-zone"
+                defaultValue={zone}
+                className="market-control"
+              >
+                <option value="">All zones</option>
+                {zones.map((entry) => (
+                  <option key={entry.zone} value={entry.zone}>
+                    {zoneLabel(entry.zone)}
+                  </option>
+                ))}
+              </select>
+              <span aria-hidden="true">▾</span>
+            </div>
+          </div>
+          <button type="submit" className="market-primary-action">
+            Show results
+          </button>
+        </form>
+
+        <section
+          className="market-dashboard-summary"
+          aria-labelledby="occupancy-heading"
+        >
+          <h2 id="occupancy-heading">
+            {dateFormat.format(new Date(date))} ·{" "}
+            {zone ? zoneLabel(zone) : "All zones"}
+          </h2>
+          <dl className="market-dashboard-metrics">
+            {metrics.map(({ key, label, value }) => (
+              <div
+                key={key}
+                className="market-dashboard-metric"
+                data-metric={key}
+              >
+                <dt>{label}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="market-dashboard-summary-note">
+            Totals include currently active spots.
+          </p>
+        </section>
+
+        <section
+          className="market-dashboard-zone-summary"
+          aria-labelledby="zone-heading"
+        >
+          <h2 id="zone-heading">Occupancy by zone</h2>
+          {rows.length === 0 ? (
+            <p>There are no active spots.</p>
+          ) : (
+            <div className="market-dashboard-table-frame">
+              <table
+                className="market-dashboard-table"
+                aria-labelledby="zone-heading"
+              >
+                <thead>
+                  <tr>
+                    <th scope="col">Zone</th>
+                    <th scope="col">Active spots</th>
+                    <th scope="col">Booked</th>
+                    <th scope="col">Available</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((row) => (
+                    <tr key={row.zone}>
+                      <th scope="row">{zoneLabel(row.zone)}</th>
+                      <td>{row.active}</td>
+                      <td>{row.booked}</td>
+                      <td>{row.available}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      </main>
+    </ScubiduPapaLayout>
   );
 }

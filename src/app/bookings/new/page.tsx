@@ -1,5 +1,5 @@
-import Link from "next/link";
 import BookingForm from "@/components/booking-form";
+import BookingPage from "@/components/booking-page";
 import { requireViewer } from "@/lib/auth";
 import { isObjectId } from "@/lib/market";
 import { listSpots } from "@/lib/market-data";
@@ -17,31 +17,30 @@ export default async function NewBookingPage({
 
   const spots = await listSpots();
   const selectedSpot = spots.find((entry) => entry._id === selectedId);
-  const cancelPath = selectedSpot ? `/spots/${selectedId}` : "/spots";
   return (
-    <main className="page-shell">
-      <Link href={cancelPath} className="text-link text-sm">
-        กลับหน้าพื้นที่ขาย
-      </Link>
-      <h1 className="mt-3 text-3xl font-semibold">จองพื้นที่ขาย</h1>
+    <BookingPage
+      title="Book a spot"
+      backPath="/spots"
+      backLabel="Explore spots"
+    >
       {spots.length ? (
         <BookingForm
           action={createBooking}
-          spots={spots.map((entry) => ({
-            id: entry._id,
-            label: `แผง ${entry.spotNumber} · โซน ${entry.zone}`,
-          }))}
+          spots={spots}
           initial={{
             spot: selectedSpot?._id ?? "",
             bookingDate: new Date().toISOString().slice(0, 10),
             productType: "",
           }}
-          cancelPath={cancelPath}
-          submitLabel="ยืนยันการจอง"
+          cancelPath="/spots"
+          submitLabel="Book spot"
+          appearance="market"
         />
       ) : (
-        <p className="mt-5 text-slate-600">ยังไม่มีพื้นที่ที่เปิดให้จอง</p>
+        <p className="mt-6 rounded-lg border border-line bg-paper px-5 py-4 text-sm text-taupe">
+          There are no spots available to book.
+        </p>
       )}
-    </main>
+    </BookingPage>
   );
 }

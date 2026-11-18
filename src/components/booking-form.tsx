@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { startTransition, type SubmitEvent, useActionState } from "react";
+import {
+  type ReactNode,
+  startTransition,
+  type SubmitEvent,
+  useActionState,
+  useState,
+} from "react";
+import type { Spot } from "@/lib/market";
 import type { FormMutation } from "./action-state";
 
 type BookingFormValues = {
@@ -10,20 +17,105 @@ type BookingFormValues = {
   productType: string;
 };
 
+const copy = {
+  standard: {
+    spot: "พื้นที่ขาย",
+    placeholder: "เลือกพื้นที่ขาย",
+    date: "วันที่จอง",
+    category: "ประเภทสินค้า",
+    cancel: "ยกเลิก",
+    pending: "กำลังบันทึก…",
+  },
+  market: {
+    spot: "Spot",
+    placeholder: "Choose a spot",
+    date: "Market date",
+    category: "Product category",
+    cancel: "Cancel",
+    pending: "Saving…",
+  },
+};
+
+const marketField =
+  "mt-2 block min-h-11 w-full rounded-md border border-line bg-paper px-3 py-2 text-base focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-dark-wine";
+const feeFormat = new Intl.NumberFormat("en-GB", { maximumFractionDigits: 2 });
+
+function SpotPreview({ spot }: { spot: Spot | undefined }) {
+  return (
+    <aside
+      aria-labelledby="spot-preview-heading"
+      className="overflow-hidden rounded-lg border border-line bg-paper"
+    >
+      <div className="border-b border-line bg-light-apricot px-5 py-4">
+        <h2
+          id="spot-preview-heading"
+          className="text-sm font-semibold text-dark-wine"
+        >
+          Spot preview
+        </h2>
+        {spot ? (
+          <p className="mt-1 font-display text-4xl leading-none font-medium wrap-break-word">
+            {spot.spotNumber}
+          </p>
+        ) : null}
+      </div>
+      {spot ? (
+        <dl className="space-y-3 px-5 py-5 text-sm">
+          <div className="flex flex-wrap justify-between gap-x-4 gap-y-1">
+            <dt className="text-taupe">Zone</dt>
+            <dd className="wrap-break-word font-medium">{spot.zone}</dd>
+          </div>
+          <div className="flex flex-wrap justify-between gap-x-4 gap-y-1">
+            <dt className="text-taupe">Size</dt>
+            <dd className="wrap-break-word font-medium">{spot.spotSize}</dd>
+          </div>
+          <div className="space-y-1">
+            <dt className="text-taupe">Location</dt>
+            <dd className="wrap-break-word font-medium">
+              {spot.locationDescription}
+            </dd>
+          </div>
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t border-line pt-4">
+            <dt className="text-taupe">Rental fee</dt>
+            <dd className="text-lg font-semibold text-dark-wine">
+              {feeFormat.format(spot.rentalFee)} THB
+              <span className="ml-1 text-xs font-normal text-taupe">
+                / night
+              </span>
+            </dd>
+          </div>
+        </dl>
+      ) : (
+        <p className="px-5 py-5 text-sm text-taupe">
+          Choose a spot to see its details and rental fee.
+        </p>
+      )}
+    </aside>
+  );
+}
+
 export default function BookingForm({
   action,
   spots,
   initial,
   cancelPath,
   submitLabel,
+  appearance = "standard",
+  children,
 }: {
   action: FormMutation;
-  spots: { id: string; label: string }[];
+  spots: Spot[];
   initial: BookingFormValues;
   cancelPath: string;
   submitLabel: string;
+  appearance?: "standard" | "market";
+  children?: ReactNode;
 }) {
   const [state, submit, pending] = useActionState(action, null);
+  const [spotId, setSpotId] = useState(initial.spot);
+  const isMarket = appearance === "market";
+  const labels = copy[appearance];
+  const controlClass = isMarket ? marketField : "form-input";
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -33,37 +125,52 @@ export default function BookingForm({
     startTransition(() => submit(data));
   }
 
-  return (
+  const form = (
     <form
       method="post"
       onSubmit={handleSubmit}
-      className="panel mt-5 max-w-xl space-y-4"
+      className={
+        isMarket
+          ? "space-y-5 rounded-lg border border-line bg-paper p-5 sm:p-6"
+          : "panel mt-5 max-w-xl space-y-4"
+      }
     >
-      <fieldset disabled={pending} className="space-y-4">
-        <div>
+      {isMarket ? (
+        <h2 className="font-display text-[28px] leading-tight font-medium">
+          Booking details
+        </h2>
+      ) : null}
+      <fieldset
+        disabled={pending}
+        className={isMarket ? "grid gap-4 sm:grid-cols-2" : "space-y-4"}
+      >
+        <div className="min-w-0">
           <label htmlFor="booking-spot" className="text-sm font-medium">
-            พื้นที่ขาย
+            {labels.spot}
           </label>
           <select
             id="booking-spot"
             name="spot"
-            defaultValue={initial.spot}
+            value={spotId}
+            onChange={(event) => setSpotId(event.currentTarget.value)}
             required
-            className="form-input"
+            className={controlClass}
           >
             <option value="" disabled>
-              เลือกพื้นที่ขาย
+              {labels.placeholder}
             </option>
             {spots.map((spot) => (
-              <option key={spot.id} value={spot.id}>
-                {spot.label}
+              <option key={spot._id} value={spot._id}>
+                {isMarket
+                  ? `${spot.spotNumber} · ${spot.zone}`
+                  : `แผง ${spot.spotNumber} · โซน ${spot.zone}`}
               </option>
             ))}
           </select>
         </div>
-        <div>
+        <div className="min-w-0">
           <label htmlFor="booking-date" className="text-sm font-medium">
-            วันที่จอง
+            {labels.date}
           </label>
           <input
             id="booking-date"
@@ -71,38 +178,72 @@ export default function BookingForm({
             type="date"
             defaultValue={initial.bookingDate}
             required
-            className="form-input"
+            className={controlClass}
           />
         </div>
-        <div>
+        <div className="min-w-0 sm:col-span-2">
           <label htmlFor="booking-product" className="text-sm font-medium">
-            ประเภทสินค้า
+            {labels.category}
           </label>
           <input
             id="booking-product"
             name="productType"
             defaultValue={initial.productType}
+            placeholder={isMarket ? "e.g. Food and drinks" : undefined}
             required
-            className="form-input"
+            className={controlClass}
           />
         </div>
       </fieldset>
       {state ? (
         <p
           role="alert"
-          className="rounded-lg bg-red-50 p-3 text-sm text-red-800"
+          className="rounded-md bg-red-50 p-3 text-sm text-red-800"
         >
           {state.error}
         </p>
       ) : null}
-      <div className="flex flex-wrap gap-3">
-        <button type="submit" disabled={pending} className="button-primary">
-          {pending ? "กำลังบันทึก…" : submitLabel}
+      <div
+        className={
+          isMarket
+            ? "flex flex-wrap gap-3 border-t border-line pt-5"
+            : "flex flex-wrap gap-3"
+        }
+      >
+        <button
+          type="submit"
+          disabled={pending}
+          className={
+            isMarket
+              ? "min-h-11 rounded-md bg-dark-wine px-5 py-2.5 text-sm font-semibold text-paper hover:bg-coffee-bean disabled:opacity-60"
+              : "button-primary"
+          }
+        >
+          {pending ? labels.pending : submitLabel}
         </button>
-        <Link href={cancelPath} className="button-secondary">
-          ยกเลิก
+        <Link
+          href={cancelPath}
+          className={
+            isMarket
+              ? "inline-flex min-h-11 items-center rounded-md border border-line px-4 py-2.5 text-sm font-medium hover:bg-linen"
+              : "button-secondary"
+          }
+        >
+          {labels.cancel}
         </Link>
       </div>
     </form>
+  );
+
+  if (!isMarket) return form;
+
+  return (
+    <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
+      <div className="min-w-0 space-y-4">
+        {form}
+        {children}
+      </div>
+      <SpotPreview spot={spots.find((spot) => spot._id === spotId)} />
+    </div>
   );
 }
