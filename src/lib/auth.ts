@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { NextAuthOptions } from "next-auth";
+import { getServerSession, type NextAuthOptions } from "next-auth";
 import { getToken } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
 import { headers } from "next/headers";
@@ -99,27 +99,21 @@ const readSessionToken = cache(async () => {
   return getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 });
 
-export async function getSessionViewer(): Promise<Viewer | null> {
-  try {
-    return (await getViewer())?.viewer ?? null;
-  } catch (error) {
-    if (error instanceof Pj05Error) return null;
-    throw error;
-  }
-}
+export const getSessionViewer = cache(async (): Promise<Viewer | null> => {
+  const session = await getServerSession(authOptions);
+  const user = session?.user;
+  if (!user?.id || !user.name || !user.email || !isRole(user.role)) return null;
+  return { id: user.id, name: user.name, email: user.email, role: user.role };
+});
 
+// The token stays inside the server-only JWT and is never put in the session,
 export const getViewer = cache(async () => {
-  const token = await readSessionToken();
-  if (!token?.sub || !token.backendToken) return null;
-
-  try {
-    const viewer = await fetchViewer(token.backendToken);
-    if (viewer.id !== token.sub) return null;
-    return { viewer, backendToken: token.backendToken };
-  } catch (error) {
-    if (error instanceof Pj05Error && error.status === 401) return null;
-    throw error;
-  }
+  const [viewer, token] = await Promise.all([
+    getSessionViewer(),
+    readSessionToken(),
+  ]);
+  if (!viewer || !token?.backendToken || token.sub !== viewer.id) return null;
+  return { viewer, backendToken: token.backendToken };
 });
 
 export function loginPath(next: string) {

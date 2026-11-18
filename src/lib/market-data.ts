@@ -5,14 +5,17 @@ import { loginPath } from "./auth";
 import { type Booking, isObjectId, type Spot } from "./market";
 import { Pj05Error, pj05Data } from "./pj05";
 
+// admin spot actions call updateTag("spots") so a change shows straight away
+export const spotsCache = { revalidate: 60, tags: ["spots"] };
+
 export function listSpots() {
-  return pj05Data<Spot[]>("spots");
+  return pj05Data<Spot[]>("spots", { next: spotsCache });
 }
 
 export async function readSpot(id: string) {
   if (!isObjectId(id)) notFound();
   try {
-    return await pj05Data<Spot>(`spots/${id}`);
+    return await pj05Data<Spot>(`spots/${id}`, { next: spotsCache });
   } catch (error) {
     if (error instanceof Pj05Error && error.status === 404) notFound();
     throw error;

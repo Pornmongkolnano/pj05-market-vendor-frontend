@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { type MutationState, textField } from "@/components/action-state";
 import { loginPath, requireViewer } from "@/lib/auth";
@@ -28,6 +28,7 @@ function failure(error: unknown, page: string): MutationState {
 }
 
 function refreshSpots() {
+  updateTag("spots");
   revalidatePath("/spots");
   revalidatePath("/spots/[id]", "page");
   revalidatePath("/admin/spots");

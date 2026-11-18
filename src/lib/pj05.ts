@@ -13,11 +13,12 @@ type RequestOptions = {
   method?: "GET" | "POST" | "PUT" | "DELETE";
   token?: string;
   body?: object;
+  next?: { revalidate?: number; tags?: string[] };
 };
 
 export async function fetchPj05(
   path: string,
-  { method = "GET", token, body }: RequestOptions = {},
+  { method = "GET", token, body, next }: RequestOptions = {},
 ) {
   const backendUrl =
     process.env.BACKEND_URL ||
@@ -33,7 +34,7 @@ export async function fetchPj05(
       method,
       headers,
       body: body ? JSON.stringify(body) : undefined,
-      cache: "no-store",
+      ...(next ? { next } : { cache: "no-store" }),
       redirect: "error",
       signal: AbortSignal.timeout(8_000),
     });
