@@ -13,7 +13,6 @@ export default async function RegisterPage({
 }: PageProps<"/register">) {
   const [params, viewer] = await Promise.all([searchParams, getSessionViewer()]);
   const destination = loginDestination(params.next);
-  const canRegisterAdmin = viewer?.role === "admin";
   const nextQuery = destination
     ? `?${new URLSearchParams({ next: destination })}`
     : "";
@@ -26,8 +25,11 @@ export default async function RegisterPage({
       alternateUrl={`/login${nextQuery}`}
     >
       <RegisterForm
-        canRegisterAdmin={canRegisterAdmin}
-        successUrl={canRegisterAdmin ? "/admin?account=created" : `/login?${successParams}`}
+        successUrl={
+          viewer?.role === "admin"
+            ? "/admin?account=created"
+            : `/login?${successParams}`
+        }
       />
     </ScubiduPapaAuthPage>
   );

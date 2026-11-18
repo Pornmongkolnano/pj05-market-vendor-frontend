@@ -1,4 +1,3 @@
-import { getViewer } from "@/lib/auth";
 import { isRole } from "@/lib/auth-types";
 import { fetchPj05 } from "@/lib/pj05";
 import { validateRegistration } from "@/lib/registration";
@@ -38,29 +37,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    let token: string | undefined;
-    if (role === "admin") {
-      const contentType = request.headers
-        .get("content-type")
-        ?.split(";")[0]
-        .trim()
-        .toLowerCase();
-      if (contentType !== "application/json") {
-        return Response.json({ success: false }, { status: 415 });
-      }
-      const account = await getViewer();
-      if (account?.viewer.role !== "admin") {
-        return Response.json(
-          { success: false },
-          { status: account ? 403 : 401 },
-        );
-      }
-      token = account.backendToken;
-    }
-
     const upstream = await fetchPj05("auth/register", {
       method: "POST",
-      token,
       body: values,
     });
     const result: {
