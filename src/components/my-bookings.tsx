@@ -219,7 +219,7 @@ function BookingDetails({
   ];
 
   return (
-    <aside className="overflow-hidden rounded-lg border border-line bg-paper lg:sticky lg:top-6">
+    <aside className="overflow-hidden rounded-lg border border-line bg-paper lg:sticky lg:top-24">
       <div className="flex flex-col gap-2.5 bg-dark-wine px-[26px] py-6">
         <p className="text-[10px] leading-[1.45] font-bold tracking-[1.4px] text-light-apricot">
           BOOKING DETAILS
@@ -278,7 +278,10 @@ function BookingDetails({
         </div>
 
         <p className="text-[11px] leading-[1.45] text-taupe">
-          Need a hand? Contact market support
+          Need a hand?
+          <span className="ml-1 font-medium underline cursor-pointer">
+            Contact market support
+          </span>
         </p>
       </div>
     </aside>

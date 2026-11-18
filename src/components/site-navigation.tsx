@@ -21,7 +21,7 @@ export default async function SiteNavigation() {
 	const links = viewer?.role === "admin" ? adminLinks : memberLinks;
 
 	return (
-		<header className="bg-dark-coffee">
+		<header className="sticky top-0 z-30 bg-dark-coffee">
 			{/* grid 1fr auto 1fr = logo (left) | links (centred) | account (right). */}
 			<nav
 				aria-label="Main"
