@@ -41,9 +41,11 @@ type Tab = "upcoming" | "past";
 export default function MyBookings({
   bookings,
   today,
+  admin = false,
 }: {
   bookings: Booking[];
   today: string; // "YYYY-MM-DD"
+  admin?: boolean; // Manage bookings: every member's bookings, with the vendor's name
 }) {
   const [tab, setTab] = useState<Tab>("upcoming");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -95,7 +97,9 @@ export default function MyBookings({
 
       {list.length === 0 ? (
         <p className="rounded-lg border border-line bg-paper p-6 text-sm text-taupe">
-          {tab === "upcoming" ? (
+          {tab === "upcoming" && admin ? (
+            "No upcoming bookings."
+          ) : tab === "upcoming" ? (
             <>
               No upcoming bookings.{" "}
               <Link
@@ -117,13 +121,18 @@ export default function MyBookings({
                 <ReservationCard
                   booking={booking}
                   selected={booking._id === selected?._id}
+                  admin={admin}
                   onSelect={() => setSelectedId(booking._id)}
                 />
               </li>
             ))}
           </ul>
           {selected ? (
-            <BookingDetails booking={selected} canEdit={tab === "upcoming"} />
+            <BookingDetails
+              booking={selected}
+              canEdit={tab === "upcoming"}
+              admin={admin}
+            />
           ) : null}
         </div>
       )}
@@ -134,10 +143,12 @@ export default function MyBookings({
 function ReservationCard({
   booking,
   selected,
+  admin,
   onSelect,
 }: {
   booking: Booking;
   selected: boolean;
+  admin: boolean;
   onSelect: () => void;
 }) {
   const { spot } = booking;
@@ -170,6 +181,11 @@ function ReservationCard({
             </span>
           </p>
           <p className="break-words">{booking.productType}</p>
+          {admin ? (
+            <p className="break-words font-medium text-coffee-bean">
+              Vendor: {booking.user?.name ?? "Unknown member"}
+            </p>
+          ) : null}
           {spot && !spot.isActive ? (
             <p className="font-medium text-dark-wine">
               This spot has been closed by the market
@@ -205,10 +221,13 @@ function ReservationCard({
 function BookingDetails({
   booking,
   canEdit,
+  admin,
 }: {
   booking: Booking;
   canEdit: boolean;
+  admin: boolean;
 }) {
+  const list = admin ? "/admin/bookings" : "/bookings";
   const { spot } = booking;
   const date = new Date(booking.bookingDate);
   const rows: [string, string][] = [
@@ -259,10 +278,10 @@ function BookingDetails({
         </div>
 
         {/* Add Edit and Cancel buttons here */}
-        <div className="flex flex-wrap items-start gap-2">
+        <div className="flex flex-wrap gap-auto justify-between">
           {canEdit && spot?.isActive ? (
             <Link
-              href={`/bookings/${booking._id}/edit`}
+              href={`${list}/${booking._id}/edit`}
               className="inline-flex min-h-11 items-center rounded-[5px] bg-dark-wine px-4 text-[13px] font-semibold text-paper hover:bg-coffee-bean"
             >
               Edit booking
@@ -272,8 +291,12 @@ function BookingDetails({
           <DeleteConfirmation
             key={booking._id}
             label="Cancel booking"
-            prompt="Cancel this booking? The spot will be released for other vendors."
-            action={deleteBooking.bind(null, booking._id, false)}
+            prompt={
+              admin
+                ? "Cancel this member's booking? The spot will be released for other vendors."
+                : "Cancel this booking? The spot will be released for other vendors."
+            }
+            action={deleteBooking.bind(null, booking._id, admin)}
           />
         </div>
 

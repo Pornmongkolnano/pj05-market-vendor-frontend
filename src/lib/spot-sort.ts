@@ -26,3 +26,8 @@ export function readSort(value: string | string[] | undefined): SortKey {
     ? (value as SortKey)
     : "alphabetical";
 }
+
+export function readPage(value: string | string[] | undefined) {
+  const page = Number(value);
+  return Number.isInteger(page) && page > 0 ? page : 1;
+}

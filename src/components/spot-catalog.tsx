@@ -12,9 +12,11 @@ const PAGE_SIZE = 9; // 3 rows of 3 cards, as in Figma
 export default async function SpotCatalog({
   sort,
   page,
+  basePath = "/spots",
 }: {
   sort: SortKey;
   page: number;
+  basePath?: string;
 }) {
   const [spots, viewer] = await Promise.all([listSpots(), getSessionViewer()]);
 
@@ -26,10 +28,18 @@ export default async function SpotCatalog({
   // The action link depends on the viewer's role.
   function action(spot: Spot) {
     if (viewer?.role === "admin") {
-      return { href: `/admin/spots/${spot._id}/edit`, label: "Edit spot" };
+      return {
+        href: `/admin/spots/${spot._id}/edit`,
+        label: "Edit spot",
+        icon: "pencil" as const,
+      };
     }
     const booking = `/bookings/new?spot=${spot._id}`;
-    return { href: viewer ? booking : loginPath(booking), label: "Book spot" };
+    return {
+      href: viewer ? booking : loginPath(booking),
+      label: "Book spot",
+      icon: "arrow" as const,
+    };
   }
 
   return (
@@ -44,10 +54,15 @@ export default async function SpotCatalog({
         // 1 column on phones, 2 on tablets, 3 on desktop
         <ul className="grid grid-cols-1 gap-x-11 gap-y-[18px] sm:grid-cols-2 lg:grid-cols-3">
           {shown.map((spot) => {
-            const { href, label } = action(spot);
+            const { href, label, icon } = action(spot);
             return (
               <li key={spot._id}>
-                <SpotCard spot={spot} actionHref={href} actionLabel={label} />
+                <SpotCard
+                  spot={spot}
+                  actionHref={href}
+                  actionLabel={label}
+                  actionIcon={icon}
+                />
               </li>
             );
           })}
@@ -57,7 +72,7 @@ export default async function SpotCatalog({
       <Pagination
         page={current}
         totalPages={totalPages}
-        hrefFor={(n) => `/spots?sort=${sort}&page=${n}`}
+        hrefFor={(n) => `${basePath}?sort=${sort}&page=${n}`}
       />
     </div>
   );

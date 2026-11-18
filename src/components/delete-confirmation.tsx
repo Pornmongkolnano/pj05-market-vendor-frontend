@@ -20,7 +20,7 @@ export default function DeleteConfirmation({
       <button
         type="button"
         onClick={() => setConfirming(true)}
-        className="button-secondary text-red-800"
+        className="button-secondary text-dark-wine cursor-pointer"
       >
         {label}
       </button>

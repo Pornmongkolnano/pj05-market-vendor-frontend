@@ -1,16 +1,23 @@
 import Link from "next/link";
 import type { Spot } from "@/lib/market";
-import { ArrowRightIcon, GridIcon, PinIcon } from "./icons";
+import { ArrowRightIcon, GridIcon, PencilIcon, PinIcon } from "./icons";
 
 export default function SpotCard({
   spot,
   actionHref,
   actionLabel,
+  actionIcon = "arrow",
 }: {
   spot: Spot;
-  actionHref: string;
+  // Leave out actionHref for a preview: the button is then drawn but not clickable.
+  actionHref?: string;
   actionLabel: string;
+  actionIcon?: "arrow" | "pencil";
 }) {
+  const buttonClass =
+    "flex items-center gap-[9px] rounded-[5px] border border-line bg-paper px-4 py-[11px] text-[13px] leading-[1.45] font-semibold whitespace-nowrap transition-colors";
+  const icon = actionIcon === "pencil" ? <PencilIcon /> : <ArrowRightIcon />;
+
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-lg border border-line bg-paper transition-colors hover:border-dark-wine">
       <header className="flex flex-col gap-0.5 bg-light-apricot px-[22px] py-[17px]">
@@ -43,14 +50,21 @@ export default function SpotCard({
             </span>
             <span className="text-[11px] text-taupe">/ night</span>
           </p>
-          <Link
-            href={actionHref}
-            aria-label={`${actionLabel} ${spot.spotNumber}`}
-            className="flex items-center gap-[9px] rounded-[5px] border border-line bg-paper px-4 py-[11px] text-[13px] leading-[1.45] font-semibold whitespace-nowrap transition-colors group-hover:border-dark-wine group-hover:bg-dark-wine group-hover:text-paper"
-          >
-            {actionLabel}
-            <ArrowRightIcon />
-          </Link>
+          {actionHref ? (
+            <Link
+              href={actionHref}
+              aria-label={`${actionLabel} ${spot.spotNumber}`}
+              className={`${buttonClass} group-hover:border-dark-wine group-hover:bg-dark-wine group-hover:text-paper`}
+            >
+              {actionLabel}
+              {icon}
+            </Link>
+          ) : (
+            <span aria-hidden="true" className={buttonClass}>
+              {actionLabel}
+              {icon}
+            </span>
+          )}
         </div>
       </div>
     </article>

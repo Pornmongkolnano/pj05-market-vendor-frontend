@@ -1,84 +1,65 @@
 import Link from "next/link";
-import DeleteConfirmation from "@/components/delete-confirmation";
+import { Suspense } from "react";
+import { PlusCircleIcon } from "@/components/icons";
+import SpotCatalog from "@/components/spot-catalog";
 import { requireViewer } from "@/lib/auth";
-import { formatFee } from "@/lib/market";
-import { listSpots } from "@/lib/market-data";
-import { deactivateSpot } from "./actions";
+import { readPage, readSort } from "@/lib/spot-sort";
 
 const notices: Record<string, string> = {
-  created: "เพิ่มพื้นที่ขายแล้ว",
-  updated: "บันทึกการแก้ไขพื้นที่แล้ว",
-  deactivated: "ปิดใช้งานพื้นที่แล้ว",
+  created: "New spot added.",
+  updated: "Spot changes saved.",
+  deactivated: "Spot deleted. Members can no longer book it.",
 };
 
 export default async function AdminSpotsPage({
   searchParams,
 }: PageProps<"/admin/spots">) {
+  // Admins only: guests go to /login, members to /forbidden
   await requireViewer("/admin/spots", "admin");
-  const [spots, { result }] = await Promise.all([listSpots(), searchParams]);
+
+  const params = await searchParams;
+  const sort = readSort(params.sort);
+  const page = readPage(params.page);
   const notice =
-    typeof result === "string" && Object.hasOwn(notices, result)
-      ? notices[result]
+    typeof params.result === "string" && Object.hasOwn(notices, params.result)
+      ? notices[params.result]
       : null;
+
   return (
-    <main className="page-shell">
-      <Link href="/admin" className="text-link text-sm">
-        กลับหน้าจัดการตลาด
-      </Link>
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-3xl font-semibold">จัดการพื้นที่ขาย</h1>
-        <Link href="/admin/spots/new" className="button-primary">
-          เพิ่มพื้นที่ขาย
-        </Link>
-      </div>
+    <main className="flex flex-col gap-2.5 px-4 pt-8 pb-[15px] sm:px-8 lg:px-10">
       {notice ? (
         <p
           role="status"
-          className="mt-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-900"
+          className="mb-2 rounded-md bg-linen px-[18px] py-3 text-sm font-medium text-dark-wine"
         >
           {notice}
         </p>
       ) : null}
-      {spots.length ? (
-        <ul className="mt-6 space-y-4">
-          {spots.map((spot) => (
-            <li
-              key={spot._id}
-              className="panel flex flex-wrap items-start justify-between gap-4"
-            >
-              <div>
-                <h2 className="text-lg font-semibold">
-                  แผง {spot.spotNumber} · โซน {spot.zone}
-                </h2>
-                <p className="mt-1 text-sm">
-                  {spot.spotSize} · {formatFee(spot.rentalFee)} / วัน
-                </p>
-                <p className="mt-1 wrap-break-word text-sm text-slate-600">
-                  {spot.locationDescription}
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Link href={`/spots/${spot._id}`} className="button-secondary">
-                  ดูรายละเอียด
-                </Link>
-                <Link
-                  href={`/admin/spots/${spot._id}/edit`}
-                  className="button-secondary"
-                >
-                  แก้ไข
-                </Link>
-                <DeleteConfirmation
-                  label="ปิดใช้งาน"
-                  prompt={`ยืนยันปิดใช้งานแผง ${spot.spotNumber} หรือไม่`}
-                  action={deactivateSpot.bind(null, spot._id)}
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="mt-5 text-slate-600">ยังไม่มีพื้นที่ที่เปิดใช้งาน</p>
-      )}
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="font-display text-[32px] leading-[1.1] font-medium">
+          All active spots
+        </h1>
+        <Link
+          href="/admin/spots/new"
+          className="flex items-center gap-[9px] rounded-[5px] border border-line bg-paper px-4 py-[11px] text-[13px] leading-[1.45] font-semibold transition-colors hover:border-dark-wine hover:bg-dark-wine hover:text-paper"
+        >
+          <PlusCircleIcon size={19} />
+          Add new spot
+        </Link>
+      </div>
+
+      {/* Same catalog as Explore spots. For an admin each card says "Edit spot". */}
+      <Suspense
+        key={`${sort}-${page}`}
+        fallback={
+          <p className="py-16 text-center text-sm text-taupe">
+            Loading vendor spots…
+          </p>
+        }
+      >
+        <SpotCatalog sort={sort} page={page} basePath="/admin/spots" />
+      </Suspense>
     </main>
   );
 }

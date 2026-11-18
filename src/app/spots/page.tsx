@@ -2,12 +2,7 @@ import { Suspense } from "react";
 import { InfoIcon } from "@/components/icons";
 import MarketIntro from "@/components/market-intro";
 import SpotCatalog from "@/components/spot-catalog";
-import { readSort } from "@/lib/spot-sort";
-
-function readPage(value: string | string[] | undefined) {
-  const page = Number(value);
-  return Number.isInteger(page) && page > 0 ? page : 1;
-}
+import { readPage, readSort } from "@/lib/spot-sort";
 
 export default async function SpotsPage({ searchParams }: PageProps<"/spots">) {
   const params = await searchParams;
