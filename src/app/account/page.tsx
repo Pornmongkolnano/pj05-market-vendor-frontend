@@ -15,10 +15,10 @@ export default async function AccountPage() {
       <div className="mt-6 flex flex-wrap items-start gap-4">
         {viewer.role === "admin" ? (
           <Link
-            href="/admin"
+            href="/register"
             className="inline-flex min-h-11 items-center rounded-lg bg-slate-900 px-4 font-medium text-white"
           >
-            จัดการตลาด
+            สร้างบัญชี
           </Link>
         ) : (
           <Link href="/bookings" className="button-primary">

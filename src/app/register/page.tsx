@@ -27,7 +27,7 @@ export default async function RegisterPage({
       <RegisterForm
         successUrl={
           viewer?.role === "admin"
-            ? "/admin?account=created"
+            ? "/admin/dashboard?account=created"
             : `/login?${successParams}`
         }
       />
